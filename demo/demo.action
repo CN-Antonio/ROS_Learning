@@ -1,0 +1,8 @@
+# 文件分三段
+## 段一：client发布的目标 Define the goal
+---
+## 段二：server回传给client的 Define the result
+## 只回传一次，在动作执行结束时
+---
+## 段三：server反馈给client的 Define a feedback message
+## 多次/一直回传

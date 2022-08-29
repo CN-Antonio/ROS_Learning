@@ -14,9 +14,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 # EBUS SDK
-set(ebus_sdk /opt/jai/ebus_sdk/linux-aarch64-arm/)
-set(EBUS_INCLUDE_DIRS ${ebus_sdk}/include)
-set(EBUS_LIBRARIES PvBase PvDevice PvPersistence PvGenICam PvStream PvTransmitter PvVirtualDevice PvAppUtils PvSerial PvGUI PvBuffer)
+set(EBUS_SDK_DIR /opt/jai/ebus_sdk/linux-aarch64-arm/)
+set(EBUS_INCLUDE_DIRS ${EBUS_SDK_DIR}/include)
+# set(EBUS_LIBRARIES PvBase PvDevice PvPersistence PvGenICam PvStream PvTransmitter PvVirtualDevice PvAppUtils PvSerial PvGUI PvBuffer)
+set(EBUS_LIBRARIES PvAppUtils PtConvertersLib PvBase PvBuffer PvGenICam PvSystem PvStream PvDevice PvTransmitter PvVirtualDevice PvPersistence PvSerial PvCameraBridge)
 
 add_definitions(-D_UNIX_ -D_LINUX_)
 
@@ -121,6 +122,17 @@ catkin_package(
 ## Build ##
 ###########
 
+# if(${ARCH} STREQUAL "x86_64")
+    set(EBUS_LIB_DIRS ${EBUS_SDK_DIR}/lib)
+    link_directories(${EBUS_LIB_DIRS})
+    link_directories("${EBUS_LIB_DIRS}/genicam/bin/Linux64_ARM/GenApi/Generic")
+# else()
+#     set(EBUS_LIB_DIRS ${PROJECT_SOURCE_DIR}/ebus_sdk/lib_i686)
+#     link_directories(${EBUS_LIB_DIRS})
+#     link_directories("${EBUS_LIB_DIRS}/genicam/bin/Linux32_i86")
+#     link_directories("${EBUS_LIB_DIRS}/genicam/bin/Linux32_i86/GenApi/Generic")
+# endif()
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
@@ -155,9 +167,10 @@ add_executable(${PROJECT_NAME}_node src/eBUS_node.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+  ${EBUS_LIBRARIES}
+)
 
 #############
 ## Install ##

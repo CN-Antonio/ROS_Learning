@@ -3,6 +3,8 @@
 //  */
 
 #include "ros/ros.h"
+#include "std_msgs/String.h"
+// #include "msgs/Msg.h"
 
 #include <PvSampleUtils.h>
 #include <PvDevice.h>
@@ -35,19 +37,28 @@ int main(int argc, char **argv)
     PvDevice *lDevice = NULL;
     PvStream *lStream = NULL;
 
-    ros::init(argc,argv, "eBUS_CAM"); //解析参数，命名当前node
+    ros::init(argc,argv, "eBUS_CAM_publisher"); //解析参数，命名当前node
     ros::NodeHandle n;  //创建句柄，实例化node
-    // ros::Publisher say_pub = n.advertise<std_msgs::String>("say_topic",10); //(发送的目标topic，消息队列长度)
+    ros::Rate delay(1);
+    ros::Publisher eBUS_publish = n.advertise<std_msgs::String>("eBUS_topic",10); //(发送的目标topic，消息队列长度)
     // ros::Publisher say_pub_new = n.advertise<msgs::Msg>("say_topic_new",10);
-    // ros::Rate loop_rate(10);    //控制rate=10.0Hz
+    delay.sleep(); // ensure pub register successful
+    ros::Rate loop_rate(1);    //控制rate(Hz)
 
     PV_SAMPLE_INIT();
 
-    cout << "PvStreamSample:" << endl << endl;
+    cout << "PvPipelineSample:" << endl << endl;
+    std_msgs::String msg;
+    std::stringstream ss;
+    ss << "PvPipelineSample:";
+    msg.data = ss.str();
+    eBUS_publish.publish(msg);
 
     PvString lConnectionID;
     if ( PvSelectDevice( &lConnectionID ) )
     {
+        msg.data = lConnectionID;
+        eBUS_publish.publish(msg);
         lDevice = ConnectToDevice( lConnectionID );
         if ( lDevice != NULL )
         {

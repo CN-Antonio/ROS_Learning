@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(eBUS)
+project(ebus)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+
+# OpenCV
+set(OpenCV_DIR /home/antonio/Downloads/opencv-4.6.0/build)
+set(cv_bridge_DIR /usr/local/share/cv_bridge/cmake/)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +15,9 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     # std_msgs
     # msgs
+    OpenCV
+    cv_bridge
+    image_transport
 )
 
 # EBUS SDK
@@ -139,6 +146,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EBUS_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -154,7 +162,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/eBUS_node.cpp)
+add_executable(${PROJECT_NAME}_node src/eBUS_node.cpp src/eBUS_.cpp)
 add_executable(${PROJECT_NAME}_listen_node src/eBUS_listen_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -171,6 +179,7 @@ add_executable(${PROJECT_NAME}_listen_node src/eBUS_listen_node.cpp)
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${EBUS_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 target_link_libraries(${PROJECT_NAME}_listen_node
   ${catkin_LIBRARIES}

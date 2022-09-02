@@ -1,33 +1,18 @@
 // /*
-//  * read images with eBUS SDK
+//  * convert Bayer RAW data with eBUS SDK & OpenCV
 //  */
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 // #include "msgs/Msg.h"
 
-#include <PvSampleUtils.h>
-#include <PvDevice.h>
-#include <PvDeviceGEV.h>
-#include <PvDeviceU3V.h>
-#include <PvStream.h>
-#include <PvStreamGEV.h>
-#include <PvStreamU3V.h>
-#include <PvPipeline.h>
-#include <PvBuffer.h>
+#include "eBUS_node.h"
+
+#include <image_transport/image_transport.h>
+#include <opencv2/imgproc/types_c.h>
+#include <cv_bridge/cv_bridge.h>
 
 PV_INIT_SIGNAL_HANDLER();
-
-#define BUFFER_COUNT ( 16 )
-
-///
-/// Function Prototypes
-///
-PvDevice *ConnectToDevice( const PvString &aConnectionID );
-PvStream *OpenStream( const PvString &aConnectionID );
-void ConfigureStream( PvDevice *aDevice, PvStream *aStream );
-PvPipeline* CreatePipeline( PvDevice *aDevice, PvStream *aStream );
-void AcquireImages( PvDevice *aDevice, PvStream *aStream, PvPipeline *aPipeline );
 
 //
 // Main function
@@ -45,138 +30,53 @@ int main(int argc, char **argv)
     delay.sleep(); // ensure pub register successful
     ros::Rate loop_rate(1);    //控制rate(Hz)
 
-    PV_SAMPLE_INIT();
-
-    cout << "PvPipelineSample:" << endl << endl;
+    cout << "PvPipeline for ROS:" << endl << endl;
     std_msgs::String msg;
     std::stringstream ss;
-    ss << "PvPipelineSample:";
+    ss << "PvPipeline for ROS:";
     msg.data = ss.str();
     eBUS_publish.publish(msg);
+    ss.str("");
 
-    PvString lConnectionID;
-    if ( PvSelectDevice( &lConnectionID ) )
-    {
-        msg.data = lConnectionID;
-        eBUS_publish.publish(msg);
-        lDevice = ConnectToDevice( lConnectionID );
-        if ( lDevice != NULL )
-        {
-            lStream = OpenStream( lConnectionID );
-            if ( lStream != NULL )
-            {
-                PvPipeline *lPipeline = NULL;
-
-                ConfigureStream( lDevice, lStream );
-                lPipeline = CreatePipeline( lDevice, lStream );
-                if( lPipeline )
-                {
-                    AcquireImages( lDevice, lStream, lPipeline );
-                    delete lPipeline;
-                }
-                
-                // Close the stream
-                cout << "Closing stream" << endl;
-                lStream->Close();
-                PvStream::Free( lStream );
-            }
-
-            // Disconnect the device
-            cout << "Disconnecting device" << endl;
-            lDevice->Disconnect();
-            PvDevice::Free( lDevice );
-        }
-    }
-
+    ProcessImages();
+    
     cout << endl;
     cout << "<press a key to exit>" << endl;
     PvWaitForKeyPress();
 
-    PV_SAMPLE_TERMINATE();
-
     return 0;
 }
 
-PvDevice *ConnectToDevice( const PvString &aConnectionID )
+bool ProcessImages()
 {
-    PvDevice *lDevice;
     PvResult lResult;
+
+    //Get the selected device information.
+    PvString lConnectionID = SP_20000C_ID;
+    // if ( !PvSelectDevice( &lConnectionID ) )
+    // {
+    //     cout << "No device selected." << endl;
+    //     return false;
+    // }
 
     // Connect to the GigE Vision or USB3 Vision device
-    cout << "Connecting to device." << endl;
-    lDevice = PvDevice::CreateAndConnect( aConnectionID, &lResult );
-    if ( lDevice == NULL )
-    {
-        cout << "Unable to connect to device: "
-        << lResult.GetCodeString().GetAscii()
-        << " ("
-        << lResult.GetDescription().GetAscii()
-        << ")" << endl;
-    }
+    PvDevice *lDevice = ConnectToDevice(lConnectionID);
+    if(NULL == lDevice) return false;
 
- 
-    return lDevice;
-}
+    // Creates stream object
+    PvStream* lStream = OpenStream( lConnectionID );
+    if(NULL == lStream) return false;
 
-PvStream *OpenStream( const PvString &aConnectionID )
-{
-    PvStream *lStream;
-    PvResult lResult;
+    // Configure streaming for GigE Vision devices
+    ConfigureStream(lDevice, lStream);
 
-    // Open stream to the GigE Vision or USB3 Vision device
-    cout << "Opening stream from device." << endl;
-    lStream = PvStream::CreateAndOpen( aConnectionID, &lResult );
-    if ( lStream == NULL )
-    {
-        cout << "Unable to stream from device. "
-            << lResult.GetCodeString().GetAscii()
-            << " ("
-            << lResult.GetDescription().GetAscii()
-            << ")"
-            << endl;
-    }
-
-    return lStream;
-}
-
-void ConfigureStream( PvDevice *aDevice, PvStream *aStream )
-{
-    // If this is a GigE Vision device, configure GigE Vision specific streaming parameters
-    PvDeviceGEV* lDeviceGEV = dynamic_cast<PvDeviceGEV *>( aDevice );
-    if ( lDeviceGEV != NULL )
-    {
-        PvStreamGEV *lStreamGEV = static_cast<PvStreamGEV *>( aStream );
-
-        // Negotiate packet size
-        lDeviceGEV->NegotiatePacketSize();
-
-        // Configure device streaming destination
-        lDeviceGEV->SetStreamDestination( lStreamGEV->GetLocalIPAddress(), lStreamGEV->GetLocalPort() );
-    }
-}
-
-PvPipeline *CreatePipeline( PvDevice *aDevice, PvStream *aStream )
-{
     // Create the PvPipeline object
-    PvPipeline* lPipeline = new PvPipeline( aStream );
-
-    if ( lPipeline != NULL )
-    {        
-        // Reading payload size from device
-        uint32_t lSize = aDevice->GetPayloadSize();
-    
-        // Set the Buffer count and the Buffer size
-        lPipeline->SetBufferCount( BUFFER_COUNT );
-        lPipeline->SetBufferSize( lSize );
-    }
-    
-    return lPipeline;
-}
-
-void AcquireImages( PvDevice *aDevice, PvStream *aStream, PvPipeline *aPipeline )
-{
+    PvPipeline *lPipeline = CreatePipeline(lDevice, lStream);
+   
     // Get device parameters need to control streaming
-    PvGenParameterArray *lDeviceParams = aDevice->GetParameters();
+    PvGenParameterArray *lDeviceParams = lDevice->GetParameters();
+    // Get stream parameters
+    PvGenParameterArray *lStreamParams = lStream->GetParameters();
 
     // Map the GenICam AcquisitionStart and AcquisitionStop commands
     PvGenCommand *lStart = dynamic_cast<PvGenCommand *>( lDeviceParams->Get( "AcquisitionStart" ) );
@@ -184,88 +84,83 @@ void AcquireImages( PvDevice *aDevice, PvStream *aStream, PvPipeline *aPipeline 
 
     // Note: the pipeline must be initialized before we start acquisition
     cout << "Starting pipeline" << endl;
-    aPipeline->Start();
+    lPipeline->Start();
 
-    // Get stream parameters
-    PvGenParameterArray *lStreamParams = aStream->GetParameters();
-
-    // Map a few GenICam stream stats counters
+    // Get stream parameters/stats.
+    PvGenInteger *lBlockCount = dynamic_cast<PvGenInteger *>( lStreamParams->Get( "BlockCount" ) );
     PvGenFloat *lFrameRate = dynamic_cast<PvGenFloat *>( lStreamParams->Get( "AcquisitionRate" ) );
     PvGenFloat *lBandwidth = dynamic_cast<PvGenFloat *>( lStreamParams->Get( "Bandwidth" ) );
+    
+    // Enables stream before sending the AcquisitionStart command.
+    cout << "Enable streaming on the controller." << endl;
+    lDevice->StreamEnable();
 
-    // Enable streaming and send the AcquisitionStart command
-    cout << "Enabling streaming and sending AcquisitionStart command." << endl;
-    aDevice->StreamEnable();
-    lStart->Execute();
+    // The buffers are queued in the stream, we just have to tell the device
+    // to start sending us images.
+    cout << "Sending StartAcquisition command to device" << endl;
+    lDeviceParams->ExecuteCommand( "AcquisitionStart" );
 
     char lDoodle[] = "|\\-|-/";
     int lDoodleIndex = 0;
+    int64_t lBlockCountVal = 0;
     double lFrameRateVal = 0.0;
     double lBandwidthVal = 0.0;
 
+    cout << endl;
     // Acquire images until the user instructs us to stop.
-    cout << endl << "<press a key to stop streaming>" << endl;
+    cout << "<press a key to stop streaming>" << endl;
+
+    ros::NodeHandle nh;
+    image_transport::ImageTransport it(nh);
+    image_transport::Publisher pub = it.advertise("/camera/image_color", 10);
+
     while ( !PvKbHit() )
     {
         PvBuffer *lBuffer = NULL;
         PvResult lOperationResult;
+        // PvBufferConverter lBufferConverter;
+        // SimpleImagingLib::ImagingContrastFilter lContrastFilter;
 
         // Retrieve next buffer
-        PvResult lResult = aPipeline->RetrieveNextBuffer( &lBuffer, 1000, &lOperationResult );
+        // lResult = lStream->RetrieveBuffer( &lBuffer, &lOperationResult, 1000 );
+        lResult = lPipeline->RetrieveNextBuffer( &lBuffer, 1000, &lOperationResult );
         if ( lResult.IsOK() )
         {
-            if ( lOperationResult.IsOK() )
+            if (lOperationResult.IsOK())
             {
-                //
                 // We now have a valid buffer. This is where you would typically process the buffer.
-                // -----------------------------------------------------------------------------------------
-                // ...
 
+                lBlockCount->GetValue( lBlockCountVal );
                 lFrameRate->GetValue( lFrameRateVal );
                 lBandwidth->GetValue( lBandwidthVal );
 
+                // Retrieve the imaging buffer based on the buffer's custom ID
+                // SimpleImagingLib::ImagingBuffer *lImagingBuffer = gImagingBuffers + lBuffer->GetID();
+
+                // Retrieve our image based on buffer ID - which has been set to the index of the array
+                // lContrastFilter.Apply( lImagingBuffer );
+
+                // uint32_t lHeight = lImagingBuffer->GetHeight();
+                // uint32_t lWidth = lImagingBuffer->GetWidth();
+
                 cout << fixed << setprecision( 1 );
                 cout << lDoodle[ lDoodleIndex ];
-                cout << " BlockID: " << uppercase << hex << setfill( '0' ) << setw( 16 ) << lBuffer->GetBlockID();
+                cout << " BlockID: " << uppercase << hex << setfill('0') << setw(16) << lBuffer->GetBlockID() << " W: " << dec << lBuffer->GetImage()->GetWidth() << " H: " 
+                    << lBuffer->GetImage()->GetHeight() << " " << lFrameRateVal << " FPS " << ( lBandwidthVal / 1000000.0 ) << " Mb/s  \r";
 
-                switch ( lBuffer->GetPayloadType() )
-                {
-                case PvPayloadTypeImage:
-                    cout << "  W: " << dec << lBuffer->GetImage()->GetWidth() << " H: " << lBuffer->GetImage()->GetHeight();
-                    break;
-
-                case PvPayloadTypeChunkData:
-                    cout << " Chunk Data payload type" << " with " << lBuffer->GetChunkCount() << " chunks";
-                    break;
-
-                case PvPayloadTypeRawData:
-                    cout << " Raw Data with " << lBuffer->GetRawData()->GetPayloadLength() << " bytes";
-                    break;
-
-                case PvPayloadTypeMultiPart:
-                    cout << " Multi Part with " << lBuffer->GetMultiPartContainer()->GetPartCount() << " parts";
-                    break;
-
-                default:
-                    cout << " Payload type not supported by this sample";
-                    break;
-                }
-
-                cout << "  " << lFrameRateVal << " FPS  " << ( lBandwidthVal / 1000000.0 ) << " Mb/s   \r";
-            }
-            else
-            {
-                // Non OK operational result
-                cout << lDoodle[ lDoodleIndex ] << " " << lOperationResult.GetCodeString().GetAscii() << "\r";
+                // publish ROS message
+                cv::Mat image = PvImage2CV2Image(lBuffer);
+                sensor_msgs::ImagePtr imgmsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
+                pub.publish(imgmsg);
             }
 
             // Release the buffer back to the pipeline
-            aPipeline->ReleaseBuffer( lBuffer );
+            lPipeline->ReleaseBuffer( lBuffer );
         }
         else
         {
-            // Retrieve buffer failure
-            cout << lDoodle[ lDoodleIndex ] << " " << lResult.GetCodeString().GetAscii() << "\r";
+            // Timeout
+            cout << lDoodle[ lDoodleIndex ] << " Timeout\r";
         }
 
         ++lDoodleIndex %= 6;
@@ -276,13 +171,59 @@ void AcquireImages( PvDevice *aDevice, PvStream *aStream, PvPipeline *aPipeline 
 
     // Tell the device to stop sending images.
     cout << "Sending AcquisitionStop command to the device" << endl;
-    lStop->Execute();
+    // lStop->Execute();
+    lDeviceParams->ExecuteCommand( "AcquisitionStop" );
 
-    // Disable streaming on the device
+    // Disable stream after sending the AcquisitionStop command.
     cout << "Disable streaming on the controller." << endl;
-    aDevice->StreamDisable();
+    lDevice->StreamDisable();
 
     // Stop the pipeline
     cout << "Stop pipeline" << endl;
-    aPipeline->Stop();
+    lPipeline->Stop();
+
+    // ReleaseBuffers();
+
+    // Now close the stream. Also optional but nice to have.
+    cout << "Closing stream" << endl;
+    lStream->Close();
+
+    // Disconnect the device. Optional, still nice to have.
+    cout << "Disconnecting device" << endl;
+    lDevice->Disconnect();
+
+    // Free the objects allocated by PvDevice and PvStream factory methods
+    PvStream::Free( lStream );
+    PvDevice::Free( lDevice );
+
+    return true;
+}
+
+cv::Mat PvImage2CV2Image(PvBuffer *aBuffer)
+{
+    PvImage *lImage = aBuffer->GetImage();
+    uint32_t lHeight = lImage->GetHeight();
+    uint32_t lWidth = lImage->GetWidth();
+    uint32_t lPixelBytes = lImage->GetBitsPerPixel() / 8;
+    uint32_t lImageSize = lImage->GetImageSize();
+    uint8_t *lPixelPtr = lImage->GetDataPointer();
+    PvPixelType lPixelType = lImage->GetPixelType();
+
+    //CV
+    cv::Mat RGBimg = cv::Mat::zeros(lHeight, lWidth, CV_8UC3);
+    cv::Mat bayerImg(lHeight, lWidth, CV_8UC1, lPixelPtr);
+
+    switch(lPixelType)
+    {
+        case PvPixelBayerRG8:
+            cv::cvtColor(bayerImg, RGBimg, CV_BayerBG2BGR);
+            break;
+        default:
+            break;
+    }
+
+    cv::resize(RGBimg, RGBimg, cv::Size(lWidth/2, lHeight/2));
+    
+    // std::cout << "width: " << img.cols << " height: " << img.rows << " channels: " << img.channels() << std::endl;
+    return RGBimg;
 }

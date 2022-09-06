@@ -64,5 +64,6 @@
         "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "ros.distro": "melodic",
-    "cmake.sourceDirectory": "${workspaceFolder}/src"
+    "cmake.sourceDirectory": "${workspaceFolder}/src",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm64"
 }

@@ -8,7 +8,7 @@
             "name": "ROS gdb",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/antonio/Documents/ROS_Learning/devel/lib/eBUS/eBUS_node",
+            "program": "/home/antonio/Documents/ROS_Learning/devel/lib/ebus/ebus_node",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

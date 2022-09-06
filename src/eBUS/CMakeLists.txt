@@ -21,8 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 # EBUS SDK
-set(EBUS_SDK_DIR /opt/jai/ebus_sdk/linux-aarch64-arm/)
-set(EBUS_INCLUDE_DIRS ${EBUS_SDK_DIR}/include)
+set(EBUS_INCLUDE_DIRS $ENV{PUREGEV_ROOT}/include)
 # set(EBUS_LIBRARIES PvBase PvDevice PvPersistence PvGenICam PvStream PvTransmitter PvVirtualDevice PvAppUtils PvSerial PvGUI PvBuffer)
 set(EBUS_LIBRARIES PvAppUtils PtConvertersLib PvBase PvBuffer PvGenICam PvSystem PvStream PvDevice PvTransmitter PvVirtualDevice PvPersistence PvSerial PvCameraBridge)
 
@@ -130,7 +129,7 @@ catkin_package(
 ###########
 
 # if(${ARCH} STREQUAL "x86_64")
-    set(EBUS_LIB_DIRS ${EBUS_SDK_DIR}/lib)
+    set(EBUS_LIB_DIRS $ENV{PUREGEV_ROOT}/lib)
     link_directories(${EBUS_LIB_DIRS})
     link_directories("${EBUS_LIB_DIRS}/genicam/bin/Linux64_ARM/GenApi/Generic")
 # else()

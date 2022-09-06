@@ -32,10 +32,10 @@
   <!-- Dependencies can be catkin packages or system dependencies -->
   <!-- Examples: -->
   <!-- Use depend as a shortcut for packages that are both build and exec dependencies -->
-  <!--   <depend>roscpp</depend> -->
+    <depend>roscpp</depend>
   <!--   Note that this is equivalent to the following: -->
-    <build_depend>roscpp</build_depend>
-    <exec_depend>roscpp</exec_depend>
+    <!-- <build_depend>roscpp</build_depend>
+    <exec_depend>roscpp</exec_depend> -->
     <build_depend>image_transport</build_depend>
     <build_export_depend>image_transport</build_export_depend>
     <exec_depend>image_transport</exec_depend>

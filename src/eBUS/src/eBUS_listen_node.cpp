@@ -1,6 +1,12 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/types_c.h>
+// #include <opencv2/imgcodecs/imgcodecs.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+
 void CallBack(const std_msgs::String::ConstPtr &msg){
     ROS_INFO("eBUS info: %s",msg->data.c_str());
 }

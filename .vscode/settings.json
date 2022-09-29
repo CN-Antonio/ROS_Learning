@@ -58,12 +58,21 @@
         "memory_resource": "cpp",
         "optional": "cpp",
         "set": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "csignal": "cpp",
+        "hash_set": "cpp",
+        "condition_variable": "cpp",
+        "forward_list": "cpp",
+        "unordered_set": "cpp",
+        "mutex": "cpp"
     },
     "python.autoComplete.extraPaths": [
         "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "ros.distro": "melodic",
     "cmake.sourceDirectory": "${workspaceFolder}/src",
-    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm64"
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm64",
+    "python.analysis.extraPaths": [
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
 }

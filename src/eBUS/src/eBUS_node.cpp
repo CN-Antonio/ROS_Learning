@@ -6,11 +6,14 @@
 #include "std_msgs/String.h"
 // #include "msgs/Msg.h"
 
-#include "eBUS_node.h"
-
-#include <image_transport/image_transport.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+
+#include <boost/scoped_ptr.hpp>
+
+#include "eBUS_node.h"
 
 PV_INIT_SIGNAL_HANDLER();
 
@@ -23,27 +26,43 @@ int main(int argc, char **argv)
     PvStream *lStream = NULL;
 
     ros::init(argc,argv, "eBUS_CAM_publisher"); //解析参数，命名当前node
-    ros::NodeHandle n;  //创建句柄，实例化node
-    ros::Rate delay(1);
-    ros::Publisher eBUS_publish = n.advertise<std_msgs::String>("eBUS_topic",10); //(发送的目标topic，消息队列长度)
+    ros::NodeHandle node_handle;  //创建句柄，实例化node
+    // ros::Rate delay(1);
+    // ros::Publisher eBUS_publish = node_handle.advertise<std_msgs::String>("eBUS_topic", 10); //(发送的目标topic，消息队列长度)
     // ros::Publisher say_pub_new = n.advertise<msgs::Msg>("say_topic_new",10);
-    delay.sleep(); // ensure pub register successful
-    ros::Rate loop_rate(1);    //控制rate(Hz)
+    // delay.sleep(); // ensure pub register successful
+    // ros::Rate loop_rate(1);    //控制rate(Hz)
 
     cout << "PvPipeline for ROS:" << endl << endl;
-    std_msgs::String msg;
-    std::stringstream ss;
-    ss << "PvPipeline for ROS:";
-    msg.data = ss.str();
-    eBUS_publish.publish(msg);
-    ss.str("");
+    // std_msgs::String msg;
+    // std::stringstream ss;
+    // ss << "PvPipeline for ROS:";
+    // msg.data = ss.str();
+    // eBUS_publish.publish(msg);
+    // ss.str("");
 
-    ProcessImages();
+    // Camera name
+    std::string camera_name = ros::this_node::getName();
+    camera_name = std::string(camera_name.begin()+ros::this_node::getNamespace().length(),camera_name.end());
+
+    // ConnectionID
+    std::string lConnectionID = SP_20000C_ID;
+
+    boost::shared_ptr<IRALab::PhotonFocusDriver> camera_node(new IRALab::PhotonFocusDriver(camera_name, lConnectionID, node_handle));
+
+    while(ros::ok() /*&& !ros_shutdown*/)
+        ros::spinOnce();
+
+    // ProcessImages();
     
-    cout << endl;
-    cout << "<press a key to exit>" << endl;
-    PvWaitForKeyPress();
+    // cout << endl;
+    // cout << "<press a key to exit>" << endl;
+    // PvWaitForKeyPress();
 
+    // the node is shutting down...cleaning
+    camera_node.reset();
+
+    ros::shutdown();
     return 0;
 }
 
@@ -112,7 +131,7 @@ bool ProcessImages()
 
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
-    image_transport::Publisher pub = it.advertise("/camera/image_color", 10);
+    image_transport::Publisher pub = it.advertise("/camera/image_color_RAW", 1);
 
     while ( !PvKbHit() )
     {
@@ -145,11 +164,18 @@ bool ProcessImages()
 
                 cout << fixed << setprecision( 1 );
                 cout << lDoodle[ lDoodleIndex ];
-                cout << " BlockID: " << uppercase << hex << setfill('0') << setw(16) << lBuffer->GetBlockID() << " W: " << dec << lBuffer->GetImage()->GetWidth() << " H: " 
-                    << lBuffer->GetImage()->GetHeight() << " " << lFrameRateVal << " FPS " << ( lBandwidthVal / 1000000.0 ) << " Mb/s  \r";
+                cout << " BlockID: " << uppercase << hex << setfill('0') << setw(16) << lBuffer->GetBlockID() 
+                     << " W: " << dec << lBuffer->GetImage()->GetWidth() 
+                     << " H: " << lBuffer->GetImage()->GetHeight() 
+                     << " " << lFrameRateVal << " FPS " << ( lBandwidthVal / 1000000.0 ) << " Mb/s  \r";
 
                 // publish ROS message
                 cv::Mat image = PvImage2CV2Image(lBuffer);
+                cv::resize(image, image, cv::Size(image.cols/4, image.rows/4));
+
+                // display
+                // cv::imshow("colorview", image);
+
                 sensor_msgs::ImagePtr imgmsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
                 pub.publish(imgmsg);
             }
@@ -222,7 +248,7 @@ cv::Mat PvImage2CV2Image(PvBuffer *aBuffer)
             break;
     }
 
-    cv::resize(RGBimg, RGBimg, cv::Size(lWidth/2, lHeight/2));
+    // cv::resize(RGBimg, RGBimg, cv::Size(lWidth/2, lHeight/2));
     
     // std::cout << "width: " << img.cols << " height: " << img.rows << " channels: " << img.channels() << std::endl;
     return RGBimg;

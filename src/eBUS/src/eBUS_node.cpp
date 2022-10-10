@@ -66,6 +66,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
+/*/
 bool ProcessImages()
 {
     PvResult lResult;
@@ -223,7 +224,7 @@ bool ProcessImages()
     PvDevice::Free( lDevice );
 
     return true;
-}
+}//*/
 
 cv::Mat PvImage2CV2Image(PvBuffer *aBuffer)
 {

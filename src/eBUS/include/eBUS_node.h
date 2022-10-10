@@ -1,9 +1,8 @@
 #ifndef __EBUS_NODE_H__
 #define __EBUS_NODE_H__
 
-//
+// boost
 #include <boost/thread.hpp>
-
 // eBUS SDK
 #include <PvSampleUtils.h>
 #include <PvDevice.h>

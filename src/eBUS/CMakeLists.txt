@@ -169,7 +169,7 @@ include_directories(
 # # Declare a C++ executable
 # # With catkin_make all packages are built within a single CMake context
 # # The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/eBUS_node.cpp src/eBUS_.cpp)
+add_executable(${PROJECT_NAME}_node src/eBUS_node.cpp src/eBUS_camera.cpp src/eBUS_Driver.cpp)
 add_executable(${PROJECT_NAME}_listen_node src/eBUS_listen_node.cpp)
 
 # # Rename C++ executable without prefix

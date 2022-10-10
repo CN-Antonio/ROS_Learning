@@ -10,7 +10,7 @@
 #include <image_transport/image_transport.h>
 // #include <image_transport/camera_publisher.h>
 
-//
+// boost
 #include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
@@ -243,7 +243,7 @@ void PhotonFocusCamera::acquireImages()
         ++lDoodleIndex %= 6;
     }
 }
-
+/*/
 PhotonFocusDriver::PhotonFocusDriver(std::string camera_name, std::string ConnectID, const ros::NodeHandle & node_handle):
     node_handle(node_handle),
     image_transport(node_handle),
@@ -292,7 +292,7 @@ void PhotonFocusDriver::publishImage(const cv::Mat img)
     camera_info->header.stamp = cv_image.header.stamp;
 
     publisher.publish(image,camera_info);
-}
+}//*/
 
 // void PhotonFocusDriver::configCb(ebus::ebusConfig & config, uint32_t level)
 // {

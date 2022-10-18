@@ -73,6 +73,7 @@ private:
     void open();
     void close();
     void acquireImages();
+    cv::Mat PvImage2CV2Image(PvBuffer *aBuffer);
 
     PvAccessType getAccessType();
 };

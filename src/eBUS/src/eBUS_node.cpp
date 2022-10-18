@@ -6,6 +6,7 @@
 #include "std_msgs/String.h"
 // #include "msgs/Msg.h"
 
+#include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <cv_bridge/cv_bridge.h>
@@ -252,5 +253,6 @@ cv::Mat PvImage2CV2Image(PvBuffer *aBuffer)
     // cv::resize(RGBimg, RGBimg, cv::Size(lWidth/2, lHeight/2));
     
     // std::cout << "width: " << img.cols << " height: " << img.rows << " channels: " << img.channels() << std::endl;
+
     return RGBimg;
 }

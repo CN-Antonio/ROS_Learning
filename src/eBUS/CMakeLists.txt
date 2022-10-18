@@ -22,7 +22,6 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   camera_info_manager
 )
-find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
 # EBUS SDK

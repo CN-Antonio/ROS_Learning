@@ -36,6 +36,7 @@ void PhotonFocusDriver::publishImage(const cv::Mat img)
 {
     cv_bridge::CvImage cv_image;
     cv_image.encoding = "bgr8";
+    // cv_image.encoding = "bayer_gbrg8";
     cv_image.image = img;
     cv_image.header.stamp = ros::Time::now();
     image = cv_image.toImageMsg();
@@ -55,6 +56,6 @@ void PhotonFocusDriver::publishImage(const cv::Mat img)
     camera_info->header.frame_id = "stereo_rig";
     camera_info->header.stamp = cv_image.header.stamp;
 
-    publisher.publish(image,camera_info);
+    publisher.publish(image, camera_info);
 }
 }

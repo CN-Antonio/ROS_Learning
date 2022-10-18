@@ -1,6 +1,8 @@
+// OpenCV
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+// #include <opencv2/imgproc/types_c.h> // Camera at /dev/videoX
 
 // Message
 #include <sensor_msgs/Image.h>
@@ -55,7 +57,17 @@ PhotonFocusCamera::~PhotonFocusCamera()
 
 void PhotonFocusCamera::start()
 {
-    open();
+    // Device Params
+    // for()
+    // set Resulution
+    // lDeviceParams->SetIntegerValue("Width", 5120);
+    // lDeviceParams->SetIntegerValue("Height", 2880);
+    // cout << "set Resolution" << endl;
+    // lDeviceParams->SetIntegerValue("OffsetX", 0);
+    // lDeviceParams->SetIntegerValue("OffsetY", 480);
+    // cout << "set Offset" << endl;
+
+    open();  // open stream
 
     // All is set and ready, now say to the camera to start sending images
     // The buffers are queued in the stream, we just have to tell the device
@@ -162,8 +174,9 @@ void PhotonFocusCamera::acquireImages()
         PvResult lOperationResult;
 
         PvBuffer *lBuffer = NULL;
-        PvImage *image = NULL;
+        PvImage *lImage = NULL;
         cv::Mat raw_image;
+        cv::Mat rgb_image;
 
         // Retrieve next buffer
         lResult = lPipeline->RetrieveNextBuffer(&lBuffer, 1000, &lOperationResult);
@@ -175,19 +188,20 @@ void PhotonFocusCamera::acquireImages()
                 CHECK_RESULT(lStreamParams->GetFloatValue("Bandwidth", bandwidth));
                 CHECK_RESULT(lStreamParams->GetIntegerValue("ErrorCount",error_count));
                 CHECK_RESULT(lStreamParams->GetEnumValue("LastError",last_error));
-                // CHECK_RESULT(device_parameters->GetIntegerValue("Average_Value",image_average));
+                // CHECK_RESULT(lDeviceParams->GetIntegerValue("Average_Value",image_average)); // No param
 
                 std::cout << std::fixed << std::setprecision(1);
                 std::cout << lDoodle[lDoodleIndex];
                 if(lBuffer->GetPayloadType() == PvPayloadTypeImage)
                 {
-                    image = lBuffer->GetImage();
-                    raw_image = cv::Mat(image->GetHeight(),image->GetWidth(),CV_8UC1,image->GetDataPointer());
+                    lImage = lBuffer->GetImage();
+                    raw_image = PvImage2CV2Image(lBuffer);
+                    // raw_image = cv::Mat(lImage->GetHeight(), lImage->GetWidth(),CV_8UC1, lImage->GetDataPointer());
 
                     // std::cout << " W:" << std::setw(4) << std::setfill(' ') << std::left << std::dec << raw_image.cols
                     //           << " H:" << std::setw(4) << std::setfill(' ') << std::left << std::dec << raw_image.rows;
 
-                    cv::cvtColor(raw_image, raw_image, CV_BayerBG2BGR);
+                    // cv::cvtColor(raw_image, raw_image, CV_BayerBG2BGR);
                     std::vector<uchar> data_encode;
                     std::vector<int> quality;
                     quality.push_back(cv::IMWRITE_JPEG_QUALITY);
@@ -231,5 +245,33 @@ void PhotonFocusCamera::acquireImages()
         boost::this_thread::interruption_point();
         ++lDoodleIndex %= 6;
     }
+}
+
+cv::Mat PhotonFocusCamera::PvImage2CV2Image(PvBuffer *aBuffer)
+{
+    PvImage *lImage = aBuffer->GetImage();
+    uint32_t lHeight = lImage->GetHeight();
+    uint32_t lWidth = lImage->GetWidth();
+    uint32_t lPixelBytes = lImage->GetBitsPerPixel() / 8;
+    uint32_t lImageSize = lImage->GetImageSize();
+    uint8_t *lPixelPtr = lImage->GetDataPointer();
+    PvPixelType lPixelType = lImage->GetPixelType();
+
+    //CV
+    cv::Mat img = cv::Mat::zeros(lHeight, lWidth, CV_8UC3);
+    cv::Mat PvImg(lHeight, lWidth, CV_8UC1, lPixelPtr);
+
+    switch(lPixelType)
+    {
+        case PvPixelBayerRG8:
+            cv::cvtColor(PvImg, img, CV_BayerBG2BGR);
+            break;
+        default:
+            break;
+    }
+    
+    // std::cout << "width: " << img.cols << " height: " << img.rows << " channels: " << img.channels() << std::endl;
+
+    return img;
 }
 }

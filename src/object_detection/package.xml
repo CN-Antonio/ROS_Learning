@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>gst_rstp_stream</name>
+  <name>gst_rtsp_stream</name>
   <version>0.0.0</version>
   <description>The gst_rstp_stream package</description>
 
@@ -36,6 +36,12 @@
   <!--   Note that this is equivalent to the following: -->
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->
+  <build_depend>image_transport</build_depend>
+  <build_export_depend>image_transport</build_export_depend>
+  <exec_depend>image_transport</exec_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_export_depend>cv_bridge</build_export_depend>
+  <exec_depend>cv_bridge</exec_depend>
   <!-- Use build_depend for packages you need at compile time: -->
   <!--   <build_depend>message_generation</build_depend> -->
   <!-- Use build_export_depend for packages you need in order to build against this package: -->

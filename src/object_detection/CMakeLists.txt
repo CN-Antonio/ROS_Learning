@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(gst_rstp_stream)
+project(gst_rtsp_stream)
 
 # # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -16,6 +16,10 @@ endif()
 include_directories(${GLIB_PKG_INCLUDE_DIRS})
 
 # glib end
+
+# OpenCV
+set(cv_bridge_DIR /usr/local/share/cv_bridge/cmake/)
+find_package(OpenCV REQUIRED)
 
 # Find CUDA begin
 FIND_PACKAGE(CUDA)
@@ -47,8 +51,8 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
     roscpp
 
-    # image_transport
-    # cv_bridge
+    cv_bridge
+    image_transport
 )
 
 # # System dependencies are found with CMake's conventions
@@ -58,33 +62,34 @@ find_package(Boost REQUIRED COMPONENTS
 
 find_package(OpenCV REQUIRED)
 
-# gst
+# gst begin
 pkg_check_modules(GST REQUIRED
     gstreamer-1.0>=1.4
-    gstreamer-sdp-1.0>=1.4​
-    gstreamer-video-1.0>=1.4​
-    gstreamer-app-1.0>=1.4
+
+    # gstreamer-sdp-1.0>=1.4​
+    # gstreamer-video-1.0>=1.4​
+    # gstreamer-app-1.0>=1.4
     gstreamer-rtsp-server-1.0
 )
 set(GST_LIB_DIRS /usr/local/lib/gstreamer-1.0)
-message(GST-lib ${GST_LIBRARIES})
-message(GST-lib-dir ${GST_LIB_DIRS})
 
-# pkg_check_modules(GSTREAMER QUIET gstreamer-0.10)
+pkg_check_modules(GSTREAMER QUIET gstreamer-0.10)
 
-# if(NOT GSTREAMER_FOUND)
-# set(GSTREAMER_VERSION_1_x TRUE)
-# endif()
+if(NOT GSTREAMER_FOUND)
+    set(GSTREAMER_VERSION_1_x TRUE)
+endif()
 
-# if(GSTREAMER_VERSION_1_x)
-# message(STATUS "gst 1.0")
-# pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
-# pkg_check_modules(GST_APP REQUIRED gstreamer-app-1.0)
-# else()
-# message(STATUS "gst 0.1")
-# pkg_check_modules(GSTREAMER REQUIRED gstreamer-0.10)
-# pkg_check_modules(GST_APP REQUIRED gstreamer-app-0.10)
-# endif()
+if(GSTREAMER_VERSION_1_x)
+    message(STATUS "gst 1.0")
+    pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+    pkg_check_modules(GST_APP REQUIRED gstreamer-app-1.0)
+else()
+    message(STATUS "gst 0.1")
+    pkg_check_modules(GSTREAMER REQUIRED gstreamer-0.10)
+    pkg_check_modules(GST_APP REQUIRED gstreamer-app-0.10)
+endif()
+
+# gst ends
 
 # # Uncomment this if the package has a setup.py. This macro ensures
 # # modules and global scripts declared therein get installed
@@ -207,6 +212,7 @@ include_directories(
 # # The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/object_detection_node.cpp)
 add_executable(${PROJECT_NAME}_node src/gstreamer_rtsp_stream.cpp)
+add_executable(${PROJECT_NAME}_node1 src/gst_cv.cpp)
 
 # # Rename C++ executable without prefix
 # # The above recommended prefix causes long target names, the following renames the
@@ -221,6 +227,13 @@ add_executable(${PROJECT_NAME}_node src/gstreamer_rtsp_stream.cpp)
 # # Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${GST_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_node1
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
     ${GST_LIBRARIES}
 )
 

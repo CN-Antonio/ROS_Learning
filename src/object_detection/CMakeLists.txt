@@ -65,10 +65,12 @@ find_package(OpenCV REQUIRED)
 # gst begin
 pkg_check_modules(GST REQUIRED
     gstreamer-1.0>=1.4
+    gstreamer-base-1.0
 
     # gstreamer-sdp-1.0>=1.4​
-    # gstreamer-video-1.0>=1.4​
-    # gstreamer-app-1.0>=1.4
+    gstreamer-video-1.0>=1.4​
+    gstreamer-app-1.0>=1.4
+    gstreamer-allocators-1.0
     gstreamer-rtsp-server-1.0
 )
 set(GST_LIB_DIRS /usr/local/lib/gstreamer-1.0)
@@ -193,6 +195,8 @@ link_directories(${GST_LIB_DIRS})
 # # Your package locations should be listed before other locations
 include_directories(
     include
+    .
+    opencv
     ${catkin_INCLUDE_DIRS}
     ${GST_INCLUDE_DIRS}
 )
@@ -212,7 +216,7 @@ include_directories(
 # # The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/object_detection_node.cpp)
 add_executable(${PROJECT_NAME}_node src/gstreamer_rtsp_stream.cpp)
-add_executable(${PROJECT_NAME}_node1 src/gst_cv.cpp)
+add_executable(${PROJECT_NAME}_node1 src/gst_cv.cpp src/OpenCVStream.cpp opencv/OpenCVFaceDect.cpp gst/GstAppSrcPipeline.cpp gst/GstPipelineWrapper.cpp gst/GstAppSinkPipeline.cpp)
 
 # # Rename C++ executable without prefix
 # # The above recommended prefix causes long target names, the following renames the

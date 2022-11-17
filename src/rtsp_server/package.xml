@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>gst_rtsp_stream</name>
+  <name>rtsp_server</name>
   <version>0.0.0</version>
-  <description>The gst_rstp_stream package</description>
+  <description>The rtsp_server package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/object_detection</url> -->
+  <!-- <url type="website">http://wiki.ros.org/rtsp_server</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -33,6 +33,7 @@
   <!-- Examples: -->
   <!-- Use depend as a shortcut for packages that are both build and exec dependencies -->
     <depend>roscpp</depend>
+    <depend>camera_info_manager</depend>
     <depend>image_transport</depend>
     <depend>cv_bridge</depend>
   <!--   Note that this is equivalent to the following: -->

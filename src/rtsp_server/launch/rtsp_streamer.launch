@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <rosparam command="load" file="$(find rtsp_server)/config/user.yaml"/>
+  <node name="ros_server" pkg="rtsp_server" type="rtsp_server_node" output="screen">
+    <param name="width" value="640" type="int"/>
+    <param name="height" value="480" type="int"/>
+  </node>
+  <!-- <param name="ip" value="127.0.0.1" type="string"/> -->
+</launch>

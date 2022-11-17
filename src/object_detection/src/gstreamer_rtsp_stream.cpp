@@ -2,40 +2,40 @@
 #include "ros/ros.h"
 #include "bits/stdc++.h"
 // opencv
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/opencv.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 // #include <opencv2/imgproc/types_c.h>
 // #include <opencv2/imgproc/imgproc.hpp>
 // ROS
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
+// #include <cv_bridge/cv_bridge.h>
+// #include <image_transport/image_transport.h>
 // Gstreamer
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 #define DEFAULT_RTSP_PORT "7551"
 
 // OpenCV-bridge
-void imageCb(const sensor_msgs::ImageConstPtr& msg)
-{
-  cv_bridge::CvImagePtr cv_ptr;
-    try
-    {
-      cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    }
-    catch (cv_bridge::Exception& e)
-    {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
-      return;
-    }
+// void imageCb(const sensor_msgs::ImageConstPtr& msg)
+// {
+//   cv_bridge::CvImagePtr cv_ptr;
+//     try
+//     {
+//       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+//     }
+//     catch (cv_bridge::Exception& e)
+//     {
+//       ROS_ERROR("cv_bridge exception: %s", e.what());
+//       return;
+//     }
  
-    // // Draw an example circle on the video stream
-    // if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
-    //   cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
+//     // // Draw an example circle on the video stream
+//     // if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
+//     //   cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
  
-    // Update GUI Window
-    cv::imshow("OPENCV_WINDOW", cv_ptr->image);
-    cv::waitKey(3);
-}
+//     // Update GUI Window
+//     cv::imshow("OPENCV_WINDOW", cv_ptr->image);
+//     cv::waitKey(3);
+// }
 
 // RTSP
 static char *port = (char *) DEFAULT_RTSP_PORT;
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, "RTSP_Streamer");
   ros::NodeHandle node_handle;
   // cv_bridge
-  image_transport::ImageTransport image_transport(node_handle);
-  image_transport::Subscriber image_sub = image_transport.subscribe("/camera/image_color_RAW", 1, imageCb);
+  // image_transport::ImageTransport image_transport(node_handle);
+  // image_transport::Subscriber image_sub = image_transport.subscribe("/camera/image_color_RAW", 1, imageCb);
 
   std::cout << "RTSP_Streamer" << std::endl << std::endl;
 

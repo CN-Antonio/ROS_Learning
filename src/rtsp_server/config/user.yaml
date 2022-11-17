@@ -1,0 +1,7 @@
+camera_name:          "SP20000"
+camera_info_url:      "null"
+/ros_streamer/width:  1280
+/ros_streamer/height: 720
+
+/ip:                  "127.0.0.1"
+/port:                "8554"

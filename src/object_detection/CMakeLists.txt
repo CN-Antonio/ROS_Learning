@@ -3,6 +3,8 @@ project(gst_rtsp_stream)
 
 # # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
+# add_definitions(-Wall)
+# add_definitions(-O0)
 
 find_package(PkgConfig REQUIRED)
 
@@ -59,8 +61,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS
     system
 )
-
-find_package(OpenCV REQUIRED)
 
 # gst begin
 pkg_check_modules(GST REQUIRED

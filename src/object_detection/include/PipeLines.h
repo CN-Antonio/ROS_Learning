@@ -110,8 +110,10 @@ static std::string CreateAppSrcPipeline()
            "block=true name="
         << APPSRC_NAME
         << LINK
+#ifdef DISP_CLOCK
         << "clockoverlay halignment=right valignment=bottom text=\"JYB1034\" shaded-background=true font-desc=\"Sans, 18\" "
         << LINK
+#endif
         << "videoconvert"
         << LINK
         << "video/x-raw,format=I420,width=1280,height=720"

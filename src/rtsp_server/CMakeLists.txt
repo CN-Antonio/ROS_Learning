@@ -27,9 +27,11 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## gst begin
 pkg_check_modules(GST REQUIRED
+    # glib-2.0
+    # gobject-2.0
+    # gmodule-2.0
     gstreamer-1.0>=1.4
     gstreamer-base-1.0
-
     # gstreamer-sdp-1.0>=1.4​
     gstreamer-video-1.0>=1.4​
     gstreamer-app-1.0>=1.4

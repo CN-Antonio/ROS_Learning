@@ -153,7 +153,9 @@ catkin_package(
 ## Build ##
 ###########
 
-link_directories(${GST_LIB_DIRS})
+link_directories(
+    ${GST_LIB_DIRS}
+)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -185,7 +187,7 @@ include_directories(
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 add_executable(${PROJECT_NAME}_node src/rtsp_server_node.cpp src/streamer.cpp)
-# add_executable(cvDisplayBridge src/cvDisplayBridge.cpp)
+# add_executable(${PROJECT_NAME}_node1 src/GstCamera.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -197,9 +199,11 @@ target_link_libraries(${PROJECT_NAME}_node
   ${OpenCV_LIBS}
   ${GST_LIBRARIES}
 )
-# target_link_libraries(cvDisplayBridge
+# target_link_libraries(${PROJECT_NAME}_node1
 #   ${catkin_LIBRARIES}
 #   ${OpenCV_LIBS}
+#   gstreamer-1.0 gstrtspserver-1.0 glib-2.0 gobject-2.0 gmodule-2.0
+#   -lpthread -lm
 # )
 
 #############

@@ -5,10 +5,17 @@
             "type": "shell",
             "command": "catkin_make",
             "args": [
-				 "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-                 "-DCATKIN_WHITELIST_PACKAGES=\"rtsp_server\""
+                "--directory",
+                "/home/antonio/Documents/ROS_Learning",
+                "-j4", //使用4个线程编译
+                "-DCMAKE_BUILD_TYPE=Debug",
+                // "-DCATKIN_WHITELIST_PACKAGES=\"rtsp_server\"",
+				"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 			],
-            "group": {"kind":"build","isDefault":true},
+            "group": {
+                "kind":"build",
+                "isDefault":true
+            },
             "presentation": {
                 "reveal": "always"
             },

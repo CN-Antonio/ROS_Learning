@@ -9,6 +9,7 @@
             "type": "ros",
             "request": "launch",
             "target": "/home/antonio/Documents/ROS_Learning/src/rtsp_server/launch/rtsp_streamer.launch",
+            // "target": "/home/antonio/Documents/ROS_Learning/src/eBUS/launch/eBUS.launch",
         },
         {
             "name": "ROS: Attach",

@@ -5,6 +5,7 @@
 // #include "bits/stdc++.h"  // TODO:remove
 // ROS
 #include <ros/ros.h>
+#include "std_msgs/String.h"
 // opencv
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>       // opencv GUI
@@ -69,6 +70,12 @@ typedef struct
 /* ffmpeg END PM */
 
 /* Private variables ---------------------------------------------------------*/
+/* thread BEGIN PV */
+void *shm = NULL;
+struct shared_use_st *shared = NULL;
+int shmid;
+/* thread END PV */
+
 /* GST BEGIN PV */
 CustomData data; // in gst_show()
 
@@ -88,63 +95,66 @@ int count_t = 0;
 volatile int stop_rc = 0; // global run flag
 
 /* Private function prototypes -----------------------------------------------*/
-void imageCb(const sensor_msgs::ImageConstPtr& msg);
-void imageCb(const sensor_msgs::ImageConstPtr& msg)
+// for test
+void CallBack(const std_msgs::String::ConstPtr &msg){
+    ROS_INFO("I Heard %s",msg->data.c_str());
+}
+void imageCb(const sensor_msgs::ImageConstPtr& message);
+void imageCb(const sensor_msgs::ImageConstPtr& message)
 {
-    ROS_INFO("imageCB begin --------------------------");
     cv_bridge::CvImagePtr cv_ptr;  // declare CvImagePtr type
-    cv::Mat img_input;
     try
     {
-        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-        // cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
+        cv_ptr = cv_bridge::toCvCopy(message, sensor_msgs::image_encodings::BGR8);
+        // cv_ptr = cv_bridge::toCvShare(message, sensor_msgs::image_encodings::BGR8);
     }
     catch (cv_bridge::Exception& e)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
     }
-    
-    // img_input = cv_ptr->image;
-    // while(!stop_rc)
-    // {
-    // }
+
+    cv::Mat img_input = cv_ptr->image;
+    // ROS_INFO("sub img width=%d, height=%d", img_input.cols, img_input.rows);
+
+    start_gst = true;
+    // process image
+    char *image = (char*)img_input.data;
+    // save image
+    if(sem_wait(&(shared->sem)) == -1)
+    {
+        printf("P ERROR!\n");
+        exit(EXIT_FAILURE);
+    }
+    memcpy(shared->Buffer, image, WIDTH*HEIGHT*3);
+    sem_post(&shared->sem);
+    // RTSP stream
+    if(USE_GST_RTSP){
+        if(rtspqueue.getSize() < 5){
+            msg *mp_rtsp = new msg;
+            mp_rtsp->len = WIDTH*HEIGHT*3;
+            mp_rtsp->data = new uint8_t[WIDTH*HEIGHT*3];
+            memcpy(mp_rtsp->data, image, WIDTH*HEIGHT*3);
+            pthread_mutex_lock(&rtspMutex);
+            rtspqueue.push(mp_rtsp);
+            pthread_mutex_unlock(&rtspMutex);
+            pthread_cond_signal(&rtspCond);
+        }
+    }
 }
 
 void *ImageSub(void *arg);
 void *ImageSub(void *arg)
 {   
     ROS_INFO("ImageSub begin --------------------------");
-    ros::NodeHandle *node_handle = (ros::NodeHandle *)arg;
-    image_transport::ImageTransport image_transport(*node_handle);
+    ros::NodeHandle *nh = (ros::NodeHandle *)arg;
+
+    // ros::Subscriber sub = (ros::NodeHandle)(*node_handle).subscribe("say_topic", 10, CallBack);
+
+    image_transport::ImageTransport image_transport(*nh);
     image_transport::Subscriber image_subscriber;
-    image_subscriber = image_transport.subscribe("/rgb/image_raw", 1, &imageCb);
-
-    cv::Mat img_input;
-    unsigned int capwidth = 0;
-    unsigned int capheight = 0;
-    unsigned int framerate = 0;
-    unsigned int frame_num = 0;
-
-    // while(!stop_rc)
-    // {
-        // RTSP stream
-        // if(USE_GST_RTSP){
-        //     if(rtspqueue.getSize() < 5){
-        //         msg *mp_rtsp = new msg;
-        //         mp_rtsp->len = WIDTH*HEIGHT*3;
-        //         mp_rtsp->data = new uint8_t[WIDTH*HEIGHT*3];
-        //         memcpy(mp_rtsp->data, image, WIDTH*HEIGHT*3);
-        //         pthread_mutex_lock(&rtspMutex);
-        //         rtspqueue.push(mp_rtsp);
-        //         pthread_mutex_unlock(&rtspMutex);
-        //         pthread_cond_signal(&rtspCond);
-        //     }
-        // }
-        // auto end = std::chrono::system_clock::now();
-        // int fps = 1000.0/std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    // }
-
+    image_subscriber = image_transport.subscribe("/camera/image_color_RAW", 1, &imageCb);
+    ROS_INFO("ImageSub ends");
 }
 
 /* called when we need to give data to appsrc */
@@ -354,10 +364,33 @@ void* multirtsp(void *args)
     g_main_loop_run (loop);
 }
 
+// main sem loop
+void* semi(void *args);
+void* semi(void *args)
+{
+    ROS_INFO("enter sem loop");
+    while(!stop_rc){
+        if(sem_wait(&(shared->sem)) == -1)
+        {
+            printf("P ERROR!\n");
+            exit(EXIT_FAILURE);
+        }
+        // memcpy(BGR_IMG, shared->Buffer, WIDTH*HEIGHT*3);
+        sem_post(&shared->sem);
+        // frame = cv::Mat(HEIGHT, WIDTH, CV_8UC3, BGR_IMG);
+        //http server
+        //cv::resize(frame, frame, Size(1280, 720), 0, 0, cv::INTER_LINEAR);
+        //send_mjpeg(frame, 8090, 400000, 10);
+        //usleep(10);
 
-void *shm = NULL;
-struct shared_use_st *shared = NULL;
-int shmid;
+        //save pic
+        //cv::imwrite("test.jpg", frame);
+        usleep(10000);
+    }
+}
+
+
+
 
 static void signal_handler(int signo)
 {
@@ -657,6 +690,11 @@ int main(int argc, char *argv[])
     std::string ip;
     std::string port;
 
+    // image transport
+    image_transport::ImageTransport image_transport(node_handle);
+    image_transport::Subscriber image_subscriber;
+    image_subscriber = image_transport.subscribe("/camera/image_color_RAW", 1, &imageCb);
+
     std::cout<<"RTSP Server Start"<<std::endl;
 
     if(node_handle.getParam("camera_name", camera_name))
@@ -680,9 +718,10 @@ int main(int argc, char *argv[])
     pthread_t thread_cvBridge;     // cv_bridge recv
     pthread_t thread_gst_rtsp;     // rtsp broadcast
     pthread_t thread_gst_show;
+    pthread_t thread_main_sem;     // main semi control
 
-    pthread_create(&thread_capture, NULL, captureImage, NULL);
-    // pthread_create(&thread_cvBridge, NULL, ImageSub, NULL);
+    // pthread_create(&thread_capture, NULL, captureImage, NULL);
+    // pthread_create(&thread_cvBridge, NULL, ImageSub, &node_handle);
     if(USE_GST_RTSP){ // RTSP server
         pthread_create(&thread_gst_rtsp, NULL, gst_rtsp, NULL);
     }
@@ -693,24 +732,27 @@ int main(int argc, char *argv[])
 
     // cv::Mat frame;
     // cv::Mat resized_image;
-    while(!stop_rc){
-        if(sem_wait(&(shared->sem)) == -1)
-        {
-            printf("P ERROR!\n");
-            exit(EXIT_FAILURE);
-        }
-        // memcpy(BGR_IMG, shared->Buffer, WIDTH*HEIGHT*3);
-        sem_post(&shared->sem);
-        // frame = cv::Mat(HEIGHT, WIDTH, CV_8UC3, BGR_IMG);
-        //http server
-        //cv::resize(frame, frame, Size(1280, 720), 0, 0, cv::INTER_LINEAR);
-        //send_mjpeg(frame, 8090, 400000, 10);
-        //usleep(10);
+    ROS_INFO("Main enters while loop");
+    pthread_create(&thread_main_sem, NULL, semi, NULL); // replace while below
+    // while(!stop_rc){
+    //     if(sem_wait(&(shared->sem)) == -1)
+    //     {
+    //         printf("P ERROR!\n");
+    //         exit(EXIT_FAILURE);
+    //     }
+    //     // memcpy(BGR_IMG, shared->Buffer, WIDTH*HEIGHT*3);
+    //     sem_post(&shared->sem);
+    //     // frame = cv::Mat(HEIGHT, WIDTH, CV_8UC3, BGR_IMG);
+    //     //http server
+    //     //cv::resize(frame, frame, Size(1280, 720), 0, 0, cv::INTER_LINEAR);
+    //     //send_mjpeg(frame, 8090, 400000, 10);
+    //     //usleep(10);
 
-        //save pic
-        //cv::imwrite("test.jpg", frame);
-        usleep(10000);
-    }
-    ROS_INFO("RTSP Server Exit");
+    //     //save pic
+    //     //cv::imwrite("test.jpg", frame);
+    //     usleep(10000);
+    // }
+
+    ros::spin();
     return 0;
 }

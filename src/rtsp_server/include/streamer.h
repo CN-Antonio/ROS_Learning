@@ -15,8 +15,8 @@
 #include <camera_info_manager/camera_info_manager.h>
 #include <sensor_msgs/Image.h>
 
-#define WIDTH  1920
-#define HEIGHT 1080
+#define WIDTH  640
+#define HEIGHT 480
 
 // communication between threads
 struct shared_use_st

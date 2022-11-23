@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="gst_rtsp_stream" name="gst_rtsp_stream_node1" output="screen">
-        
-    </node>
-</launch>

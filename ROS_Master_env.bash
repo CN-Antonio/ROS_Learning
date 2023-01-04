@@ -1,0 +1,2 @@
+export ROS_IP=192.168.2.156
+export ROS_MASTER_URL=http://192.168.2.156:11311/

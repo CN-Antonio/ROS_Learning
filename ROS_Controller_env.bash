@@ -1,0 +1,1 @@
+export ROS_MASTER_URL=http://192.168.2.156:11311/

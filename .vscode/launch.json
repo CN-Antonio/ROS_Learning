@@ -5,12 +5,34 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ROS gdb",
+            "name": "rosrun DBG",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/antonio/Documents/ROS_Learning/devel/lib/compressed-video-transport/publisher",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "print for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+
+        {
+            "name": "roslaunch DBG",
             "type": "ros",
             "request": "launch",
-            "target": "/home/antonio/Documents/ROS_Learning/src/rtsp_server/launch/rtsp_streamer.launch",
+            "target": "/home/antonio/Documents/ROS_Learning/src/test/launch/test.launch",
+            // "target": "/home/antonio/Documents/ROS_Learning/src/rtsp_server/launch/rtsp_streamer.launch",
             // "target": "/home/antonio/Documents/ROS_Learning/src/eBUS/launch/eBUS.launch",
         },
+        
         {
             "name": "ROS: Attach",
             "request": "attach",

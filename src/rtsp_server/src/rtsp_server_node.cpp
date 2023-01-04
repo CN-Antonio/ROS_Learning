@@ -102,11 +102,11 @@ void CallBack(const std_msgs::String::ConstPtr &msg){
 void imageCb(const sensor_msgs::ImageConstPtr& message);
 void imageCb(const sensor_msgs::ImageConstPtr& message)
 {
-    cv_bridge::CvImagePtr cv_ptr;  // declare CvImagePtr type
+    cv_bridge::CvImageConstPtr cv_ptr;  // declare CvImagePtr type
     try
     {
-        cv_ptr = cv_bridge::toCvCopy(message, sensor_msgs::image_encodings::BGR8);
-        // cv_ptr = cv_bridge::toCvShare(message, sensor_msgs::image_encodings::BGR8);
+        // cv_ptr = cv_bridge::toCvCopy(message, sensor_msgs::image_encodings::BGR8);
+        cv_ptr = cv_bridge::toCvShare(message, sensor_msgs::image_encodings::BGR8);
     }
     catch (cv_bridge::Exception& e)
     {
@@ -143,6 +143,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& message)
     }
 }
 
+/*
 void *ImageSub(void *arg);
 void *ImageSub(void *arg)
 {   
@@ -155,7 +156,7 @@ void *ImageSub(void *arg)
     image_transport::Subscriber image_subscriber;
     image_subscriber = image_transport.subscribe("/camera/image_color_RAW", 1, &imageCb);
     ROS_INFO("ImageSub ends");
-}
+}*/
 
 /* called when we need to give data to appsrc */
 static void need_data (GstElement * appsrc, guint unused, MyContext * ctx);
@@ -641,9 +642,10 @@ void *gst_rtsp(void *arg)
     // Hardware Preset Level 0 DisablePreset 1 UltraFastPreset 2 FastPreset
     str = g_strdup_printf("("
         " appsrc name=videosrc is-live=true "
+        // " ！clockoverlay halignment=right valignment=bottom text=\"SP2000\" shaded-background=true font-desc=\"Sans, 36\" "
         " ! videoconvert ! nvvidconv "
         " ! video/x-raw(memory:NVMM), format=I420 "
-        " ! nvv4l2h264enc maxperf-enable=1 control-rate=0 bitrate=1000000 preset-level=1 profile=0 "
+        " ! nvv4l2h264enc maxperf-enable=1 control-rate=0 bitrate=1000000 preset-level=0 profile=0 "
         " ! rtph264pay name=pay0 pt=96 sync=false "
         " )");
 

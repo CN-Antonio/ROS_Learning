@@ -9,8 +9,36 @@ add_definitions(-lpthread)
 find_package(PkgConfig REQUIRED)
 
 # OpenCV
-set(cv_bridge_DIR /usr/local/share/cv_bridge/cmake/)
+# set(OpenCV_DIR /usr/lib/aarch64-linux-gnu/cmake/opencv4)
 find_package(OpenCV REQUIRED)
+message(STATUS "OpenCV library status:")
+message(STATUS "    version: ${OpenCV_VERSION}")
+message(STATUS "    libraries: ${OpenCV_LIBS}")
+message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
+set(cv_bridge_DIR /usr/local/share/cv_bridge/cmake/)
+
+# Find CUDA begin
+FIND_PACKAGE(CUDA)
+if(CUDA_FOUND)
+    find_package(CUDA REQUIRED)
+    message(STATUS "CUDA Version: ${CUDA_VERSION_STRINGS}")
+    message(STATUS "CUDA Libararies: ${CUDA_LIBRARIES}")
+    set(
+        CUDA_NVCC_FLAGS
+        ${CUDA_NVCC_FLAGS};
+        -O3
+        -gencode arch=compute_35,code=sm_35
+        -gencode arch=compute_50,code=[sm_50,compute_50]
+        -gencode arch=compute_52,code=[sm_52,compute_52]
+        -gencode arch=compute_61,code=sm_61
+        -gencode arch=compute_62,code=sm_62
+    )
+    add_definitions(-DGPU)
+else()
+    list(APPEND LIBRARIES "m")
+endif()
+
+# Find CUDA end
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -21,6 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     camera_info_manager
 )
+message(STATUS ${cv_bridge_DIR})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

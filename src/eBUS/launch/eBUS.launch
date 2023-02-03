@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node name="ros_ebus_server" pkg="ebus" type="ebus_listen_node" output="screen">
+  <node name="ros_ebus_server" pkg="ebus" type="ebus_node" output="screen">
     <!-- <param name="width" value="640" type="int"/>
     <param name="height" value="480" type="int"/> -->
   </node>

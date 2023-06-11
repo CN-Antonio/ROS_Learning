@@ -8,10 +8,8 @@
             "name": "rosrun DBG",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/antonio/Documents/ROS_Learning/devel/lib/compressed-video-transport/publisher",
-            "args": [
-                "1"
-            ],
+            "program": "/home/antonio/Documents/ROS_Learning/devel/lib/mv2/mv2_node",
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -31,7 +29,7 @@
             "name": "roslaunch DBG",
             "type": "ros",
             "request": "launch",
-            "target": "/home/antonio/Documents/ROS_Learning/src/test/launch/test.launch",
+            "target": "/home/antonio/Documents/Ros_Learning/src/mv2/launch/run.launch",
             // "target": "/home/antonio/Documents/ROS_Learning/src/rtsp_server/launch/rtsp_streamer.launch",
             // "target": "/home/antonio/Documents/ROS_Learning/src/eBUS/launch/eBUS.launch",
         },

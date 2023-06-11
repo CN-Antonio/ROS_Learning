@@ -51,7 +51,7 @@ set(MV2_LIBRARIES CANUSB Mv2control RczCommunication)
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-#   Message1.msg
+  status.msg
 #   Message2.msg
 )
 

@@ -19,9 +19,9 @@ int main(int argc, char * argv[])
     while(ros::ok() /*&& !ros_shutdown*/)
     {
         // poll device until end of file
-        // bool polled_ = dvr.poll();
-        // if (!polled_)
-        //     ROS_ERROR_THROTTLE(1.0, "Velodyne - Failed to poll device.");
+        bool polled_ = dvr.poll();
+        if (!polled_)
+            ROS_ERROR_THROTTLE(1.0, "Velodyne - Failed to poll device.");
 
         ros::spinOnce();
     }

@@ -10,6 +10,7 @@
 // ROS
 #include <ros/ros.h>
 #include "std_msgs/String.h"
+#include "mv2/status.h"
 
 // ROS2
 // #include <rclcpp/rclcpp.hpp>
@@ -44,6 +45,13 @@ protected:
     void closeEvent(/* QCloseEvent * */);
 
 private:
+/* ROS */
+    ros::NodeHandle nh_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+
+    std_msgs::String test_pub;
+
 /* private slots */
     void ReqOtherErr();
     void ReqClearErr();

@@ -54,7 +54,6 @@ bool MvCnt::Start()
     _mvCnt->SetStrServo(SERVO_OFF);
     _mvCnt->SetStrAngle(0.0f);
 
-
     return true;
 }
 

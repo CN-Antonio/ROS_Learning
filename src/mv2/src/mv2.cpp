@@ -9,6 +9,12 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
           ros::NodeHandle private_nh,
           std::string const & node_name)
 {
+    /* ROS init */
+    pub_ = node.advertise<mv2::status>("mv2/status", 10);
+    
+    // ros::Rate loop_rate(100);    //控制rate=100.0Hz
+
+    /* mv2 init*/
     mv = new MvCnt();
     mv->Init();
     mv->Start();
@@ -22,6 +28,16 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
     _comApp->Start();
     ROS_INFO_STREAM("comSvr/App started, able to communicate to vehicle");
 
+    // for(int i=0; i<40; i++)
+    // {
+    //     _config.data[i] = 0;
+    // }
+
+    /* mv2 control */
+    // init control mode
+    mv->SetDrvMode(MODE_MANUAL);
+    mv->SetStrMode(MODE_MANUAL);
+    // init control value
     _drvTargetVeloc = 0;
     _drvTargetStroke = 0;
     _brkTargetStroke = 0;
@@ -30,18 +46,48 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
 
     _selectLog.start = false;
 
-    for(int i=0; i<40; i++)
-    {
-        _config.data[i] = 0;
-    }
+    // _gameData.angle = 0;
+    // _gameData.brake = 0;
+    // _gameData.button = 0;
+    // _gameData.drive = 0;
 
-    /* mv2 control */
-    // TODO
+    _visionDistMean = 0;
+    _visionDistMin = 0;
+    _visionPosX1 = 0;
+    _visionPosX2 = 0;
+    _visionPosY1 = 0;
+    _visionPosY2 = 0;
+
+    // _gameEnable = false;
+    // _gameRes = _Game.GameInit();
+    // _Game.SetGameReceiveHandler(this);
+    // _Game.GameStart();
+    
+    // callback
+    // mv->SetConfigCallback(this);
+
+}
+
+/** poll the device
+ *
+ *  @returns true unless end of file reached
+ */
+bool Mv2Driver::poll(void)
+{
+    // Allocate a new shared pointer for zero-copy sharing with other nodelets.
+    mv2::statusPtr status(new mv2::status);
+
+    // publish message using time of last packet read
+    ROS_DEBUG("Publishing a full vehicle status.");
+
+    return true;
 }
 
 Mv2Driver::~Mv2Driver()
 {
-  // TODO: set all mode "manual"
+    // set all mode "manual"
+    mv->Stop();
+    mv->Close();
 }
 
 void Mv2Driver::GetTimeStamp(char* date) // TODO: 
@@ -115,4 +161,5 @@ void Mv2Driver::readInfTimer()
         mv->SndPCStatus();
 //    }
 }
-}
+
+} // namespace mv2_driver

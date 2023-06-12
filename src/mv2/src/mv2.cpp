@@ -21,10 +21,10 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
     mv->Start();
     ROS_INFO_STREAM("mv2 init");
 
-    // _comSvr = new CommServer(); // control by udp socket
+    _comSvr = new CommServer(); // control by udp socket
     _comApp = new CommApp();    // control through CAN port
     _comApp->Init();
-    // _comApp->SetCommServer(_comSvr);
+    _comApp->SetCommServer(_comSvr);
     _comApp->SetMvCnt(mv);
     _comApp->Start();
     ROS_INFO_STREAM("comSvr/App started, able to communicate to vehicle");
@@ -85,9 +85,12 @@ bool Mv2Driver::poll(void)
     // Allocate a new shared pointer for zero-copy sharing with other nodelets.
     mv2::statusPtr status(new mv2::status);
 
+    // read vehicle status
+    readInfTimer();
+
     // publish message using time of last packet read
-    ROS_DEBUG("Publishing a full vehicle status.");
-    // ROS_INFO_STREAM("Publishing a full vehicle status.");
+    ROS_DEBUG("\nPublishing a full vehicle status.");
+    ROS_INFO_STREAM("\nPublishing a full vehicle status.");
 
     // TODO: timestamp
     // status->header.stamp
@@ -154,7 +157,7 @@ void Mv2Driver::readInfTimer()
     _comApp->GetDistPos(&_visionPosX1, &_visionPosX2, 
 			&_visionPosY1, &_visionPosY2);
 
-    // TODO: function to replace
+    // TODO: function to replace(show info)
     // viewBattInf();
     // viewBrakeInf();
     // viewDrvInf();
@@ -168,6 +171,9 @@ void Mv2Driver::readInfTimer()
     // viewFirmVersion();
 
     // viewVision2Inf();
+    
+    ROS_INFO("vehicle status: ");
+    ROS_INFO("(Batt.) Main: %f V, Sub: %f V", _battInf.mVoltage, _battInf.sVoltage);
 
 //    if(_drvInf.mode == MODE_PROGRAM || _strInf.mode == MODE_PROGRAM){
         mv->SndPCStatus();

@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
             ROS_ERROR_THROTTLE(1.0, "mv2 - Failed to poll device.");
 
         poll_rate_.sleep();
-        ros::spin();
+        // ros::spin();
         // ros::spinOnce();
     }
 

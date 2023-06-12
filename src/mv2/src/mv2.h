@@ -10,6 +10,8 @@
 // ROS
 #include <ros/ros.h>
 #include "std_msgs/String.h"
+// #include <autoware_vehicle_msgs/Steering.h>
+#include "mv2/control.h"
 #include "mv2/status.h"
 
 // ROS2
@@ -50,7 +52,9 @@ private:
     ros::Subscriber sub_;
     ros::Publisher pub_;
 
-    std_msgs::String test_pub;
+    // std_msgs::String test_pub;
+
+    void controlMsgCb(const mv2::control::ConstPtr &msg);
 
 /* private slots */
     void ReqOtherErr();

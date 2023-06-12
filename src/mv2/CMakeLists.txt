@@ -52,6 +52,7 @@ set(MV2_LIBRARIES CANUSB Mv2control RczCommunication)
 add_message_files(
   FILES
   status.msg
+  control.msg
 #   Message2.msg
 )
 
@@ -147,6 +148,10 @@ add_executable(${PROJECT_NAME}_node
   # src/mv2_vehicle_info.cpp
 )
 
+add_executable(say_node 
+  src/say_node.cpp
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -159,6 +164,10 @@ add_executable(${PROJECT_NAME}_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+  ${MV2_LIBRARIES}
+)
+target_link_libraries(say_node
   ${catkin_LIBRARIES}
   ${MV2_LIBRARIES}
 )

@@ -1,4 +1,11 @@
 
+# test str
+string testStr
+
+# Basic info
+time stamp              # packet timestamp
+bool isConnected
+
 # Battery info
 int8 SOC
 

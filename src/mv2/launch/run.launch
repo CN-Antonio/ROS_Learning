@@ -4,5 +4,7 @@
     <!-- <param name="width" value="640" type="int"/>
     <param name="height" value="480" type="int"/> -->
   </node>
+  <node name="mv2_talker" pkg="mv2" type="say_node" output="screen">
+  </node>
   <!-- <param name="ip" value="127.0.0.1" type="string"/> -->
 </launch>

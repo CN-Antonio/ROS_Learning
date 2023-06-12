@@ -19,7 +19,7 @@ public:
 	bool Setup(const char *hostname, int port);
 	int Send(const void *buf, size_t count);
     
-    	std::auto_ptr<UDPSocket> Accept();
+    	std::unique_ptr<UDPSocket> Accept();
 	int Shutdown();
 
         int descriptor() const { return descriptor_; }
@@ -142,7 +142,7 @@ class TCPSocket {
      * a new TCPSocket instance that represents the new connection.
      * @return  A new TCPSocket instance that represents the new connection.
      */
-    std::auto_ptr<TCPSocket> Accept();
+    std::unique_ptr<TCPSocket> Accept();
     int Shutdown();
 
     int Send(const void* buf, size_t count);
@@ -304,8 +304,8 @@ class SocketReader {
     explicit SocketReader(TCPSocket* sock_ptr);
     SocketReader(TCPSocket* sock_ptr, LineSeparator::Type line_sep);
 
-    std::auto_ptr< std::vector<byte_t> > Read(unsigned int nread);
-    std::auto_ptr< std::vector<byte_t> > ReadLine();
+    std::unique_ptr< std::vector<byte_t> > Read(unsigned int nread);
+    std::unique_ptr< std::vector<byte_t> > ReadLine();
 
     LineSeparator::Type line_sep() const { return line_sep_; }
     void set_line_sep(LineSeparator::Type value) { line_sep_ = value; }

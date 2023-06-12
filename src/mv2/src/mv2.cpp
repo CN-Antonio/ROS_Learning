@@ -10,6 +10,7 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
           std::string const & node_name)
 {
     /* ROS init */
+    sub_ = node.subscribe<mv2::control>("mv2/control", 10, boost::bind(&Mv2Driver::controlMsgCb, this, _1));
     pub_ = node.advertise<mv2::status>("mv2/status", 10);
     
     // ros::Rate loop_rate(100);    //控制rate=100.0Hz
@@ -20,10 +21,10 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
     mv->Start();
     ROS_INFO_STREAM("mv2 init");
 
-    _comSvr = new CommServer();
-    _comApp = new CommApp();
+    // _comSvr = new CommServer(); // control by udp socket
+    _comApp = new CommApp();    // control through CAN port
     _comApp->Init();
-    _comApp->SetCommServer(_comSvr);
+    // _comApp->SetCommServer(_comSvr);
     _comApp->SetMvCnt(mv);
     _comApp->Start();
     ROS_INFO_STREAM("comSvr/App started, able to communicate to vehicle");
@@ -68,6 +69,13 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
 
 }
 
+Mv2Driver::~Mv2Driver()
+{
+    // set all mode "manual"
+    mv->Stop();
+    mv->Close();
+}
+
 /** poll the device
  *
  *  @returns true unless end of file reached
@@ -79,15 +87,19 @@ bool Mv2Driver::poll(void)
 
     // publish message using time of last packet read
     ROS_DEBUG("Publishing a full vehicle status.");
+    // ROS_INFO_STREAM("Publishing a full vehicle status.");
+
+    // TODO: timestamp
+    // status->header.stamp
+
+    pub_.publish(status);
 
     return true;
 }
 
-Mv2Driver::~Mv2Driver()
+void Mv2Driver::controlMsgCb(const mv2::control::ConstPtr &msg)
 {
-    // set all mode "manual"
-    mv->Stop();
-    mv->Close();
+    ROS_INFO("mv2 control msg: %s", msg->str.c_str());
 }
 
 void Mv2Driver::GetTimeStamp(char* date) // TODO: 

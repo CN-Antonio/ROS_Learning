@@ -20,6 +20,11 @@
                 "reveal": "always"
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "catkin_build_mv2",
+            "type": "shell",
+            "command": "catkin build mv2",
         }
     ]
 }

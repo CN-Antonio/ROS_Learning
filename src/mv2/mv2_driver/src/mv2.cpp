@@ -10,8 +10,8 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
           std::string const & node_name)
 {
     /* ROS init */
-    sub_ = node.subscribe<mv2::control>("mv2/control", 10, boost::bind(&Mv2Driver::controlMsgCb, this, _1));
-    pub_ = node.advertise<mv2::status>("mv2/status", 10);
+    sub_ = node.subscribe<mv2_msgs::control>("mv2/control", 10, boost::bind(&Mv2Driver::controlMsgCb, this, _1));
+    pub_ = node.advertise<mv2_msgs::status>("mv2/status", 10);
     
     // ros::Rate loop_rate(100);    //控制rate=100.0Hz
 
@@ -83,7 +83,7 @@ Mv2Driver::~Mv2Driver()
 bool Mv2Driver::poll(void)
 {
     // Allocate a new shared pointer for zero-copy sharing with other nodelets.
-    mv2::statusPtr status(new mv2::status);
+    mv2_msgs::statusPtr status(new mv2_msgs::status);
 
     // read vehicle status
     readInfTimer();
@@ -92,15 +92,16 @@ bool Mv2Driver::poll(void)
     ROS_DEBUG("\nPublishing a full vehicle status.");
     ROS_INFO_STREAM("\nPublishing a full vehicle status.");
 
-    // TODO: timestamp
+    // gather status info
     // status->header.stamp
+    // status.velocity = _vehicleInf.veloc;
 
     pub_.publish(status);
 
     return true;
 }
 
-void Mv2Driver::controlMsgCb(const mv2::control::ConstPtr &msg)
+void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &msg)
 {
     ROS_INFO("mv2 control msg: %s", msg->str.c_str());
 }
@@ -174,6 +175,7 @@ void Mv2Driver::readInfTimer()
     
     ROS_INFO("vehicle status: ");
     ROS_INFO("(Batt.) Main: %f V, Sub: %f V", _battInf.mVoltage, _battInf.sVoltage);
+    ROS_INFO("(Vehicle.) Veloc: %f km/h", _vehicleInf.veloc);
 
 //    if(_drvInf.mode == MODE_PROGRAM || _strInf.mode == MODE_PROGRAM){
         mv->SndPCStatus();

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(mv2)
+project(mv2_driver)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,8 +9,7 @@ project(mv2)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
-  message_generation
+  mv2_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,12 +48,11 @@ set(MV2_LIBRARIES CANUSB Mv2control RczCommunication)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  status.msg
-  control.msg
+# add_message_files(
+#   FILES
+#   Message1.msg
 #   Message2.msg
-)
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +69,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
+# generate_messages(
+#   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
-)
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,8 +105,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES mv2
- CATKIN_DEPENDS message_runtime
+#  LIBRARIES mv2_driver
+#  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
 
@@ -129,7 +127,7 @@ link_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/mv2.cpp
+#   src/${PROJECT_NAME}/mv2_driver.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -219,7 +217,7 @@ target_link_libraries(say_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_mv2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_mv2_driver.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

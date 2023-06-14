@@ -9,7 +9,7 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "mv2_driver");
     ros::NodeHandle node;
     ros::NodeHandle private_nh("~");
-    ros::Rate poll_rate_(20);
+    ros::Rate poll_rate_(5);
 
     // ROS2
     // rclcpp::init(argc, argv);
@@ -25,8 +25,8 @@ int main(int argc, char * argv[])
         if (!polled_)
             ROS_ERROR_THROTTLE(1.0, "mv2 - Failed to poll device.");
 
-        poll_rate_.sleep();
-        // ros::spin();
+        // poll_rate_.sleep();
+        ros::spin();
         // ros::spinOnce();
     }
 

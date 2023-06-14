@@ -28,6 +28,22 @@
 #include <sys/types.h>
 #include <pthread.h>
 
+// steering
+#define MV2_STEER_MODE_MANUAL   0
+#define MV2_STEER_MODE_PROGRAM  1
+#define MV2_STEER_CMODE_ANGLE   0
+#define MV2_STEER_CMODE_TORQUE  1
+
+// drive
+#define MV2_DRIVE_MODE_MANUAL     0
+#define MV2_DRIVE_MODE_PROGRAM    1
+#define MV2_DRIVE_CMODE_VELOCITY  0
+#define MV2_DRIVE_CMODE_STROKE    1
+#define MV2_DRIVE_SHIFT_MODE_N    0
+#define MV2_DRIVE_SHIFT_MODE_D    1
+#define MV2_DRIVE_SHIFT_MODE_R    2
+
+
 namespace mv2_driver {
 class Mv2Driver
 // class Mv2Driver : public /*GameReceiveHandler, */ChangeConfig
@@ -107,7 +123,7 @@ private:
 
     void resetPort();
 
-//
+    // Lamp
     void setBrkLampOn();
     void setBrkLampOff();
     void setRightBlinkOn();

@@ -85,16 +85,34 @@ bool Mv2Driver::poll(void)
     // Allocate a new shared pointer for zero-copy sharing with other nodelets.
     mv2_msgs::statusPtr status(new mv2_msgs::status);
 
-    // read vehicle status
+    // read status from the vehicle
     readInfTimer();
 
     // publish message using time of last packet read
-    ROS_DEBUG("\nPublishing a full vehicle status.");
-    ROS_INFO_STREAM("\nPublishing a full vehicle status.");
+    ROS_DEBUG("Publishing a full vehicle status.");
+    ROS_INFO_STREAM("Publishing a full vehicle status.");
 
-    // gather status info
-    // status->header.stamp
-    // status.velocity = _vehicleInf.veloc;
+    /* gather status info */
+    // VehicleInf
+    status->VehicleInf.soc = _vehicleInf.soc; 
+    status->VehicleInf.veloc = _vehicleInf.veloc;
+    status->VehicleInf.odometer = _vehicleInf.odometer;
+    status->VehicleInf.trip = _vehicleInf.trip;
+    // BattInf
+    // status->BattInf.
+    // BrakeInf
+    // DrvInf
+    // StrInf
+    status->StrInf.mode = _strInf.mode;
+    status->StrInf.aAngle = _strInf.aAngle;
+    status->StrInf.tAngle = _strInf.tAngle;
+    // OtherInf
+    status->OtherInf.errLevel = _otherInf.errLevel;
+    status->OtherInf.errCode = _otherInf.errCode;
+    status->OtherInf.ignition = _otherInf.ignition;
+    status->OtherInf.emergency = _otherInf.emergency;
+    status->OtherInf.adcStatus = _otherInf.adcStatus;
+    status->OtherInf.watchdogStatus = _otherInf.watchdogStatus;
 
     pub_.publish(status);
 
@@ -104,6 +122,26 @@ bool Mv2Driver::poll(void)
 void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &msg)
 {
     ROS_INFO("mv2 control msg: %s", msg->str.c_str());
+    
+
+    // Timeout count
+
+    /* set control values */
+
+    // sndDrvModeP();
+    // sndDrvCModeV();
+    // sndDrvServoON();
+
+    sndStrModeP();
+    sndStrCModeA();
+    sndStrServoON();
+
+    setLeftBlinkOn();
+    
+    // set zero timeout
+    // set manual timeout
+
+    // control
 }
 
 void Mv2Driver::GetTimeStamp(char* date) // TODO: 
@@ -129,12 +167,92 @@ void Mv2Driver::GetTimeStamp(char* date) // TODO:
 void Mv2Driver::sndDrvModeM()
 {
     mv->SetDrvMode(MODE_MANUAL);
-    //ui->horizontalSlider_drvStroke->setValue(0);
-    //ui->horizontalSlider_drvVeloc->setValue(0);
-    // ui->scrollBar_accStroke->setValue(0);
-    // ui->scrollBar_drvVeloc->setValue(0);
     _drvTargetVeloc = 0;
     _drvTargetStroke = 0;
+}
+// drive mode program
+void Mv2Driver::sndDrvModeP()
+{
+    mv->SetDrvMode(MODE_PROGRAM);
+}
+void Mv2Driver::sndDrvCModeS()
+{
+    mv->SetDrvCMode(CONT_MODE_STROKE);
+}
+// drive control mode velocity
+void Mv2Driver::sndDrvCModeV()
+{
+    mv->SetDrvCMode(CONT_MODE_VELOCITY);
+}
+// drive override mode ON
+/*void Mv2Driver::sndDrvOModeON()
+{
+    mv->SetDrvOMode(OVERRIDE_MODE_ON);
+}*/
+// drive override mode OFF
+/*void Mv2Driver::sndDrvOModeOFF()
+{
+    mv->SetDrvOMode(OVERRIDE_MODE_OFF);
+}*/
+// drive servo ON
+void Mv2Driver::sndDrvServoON()
+{
+    mv->SetDrvServo(0x00);
+}
+// drive servo OFF
+void Mv2Driver::sndDrvServoOFF()
+{
+    mv->SetDrvServo(0x10);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// steer Mode
+/////////////////////////////////////////////////////////////////////////////
+// steer mode Manual
+void Mv2Driver::sndStrModeM()
+{
+    mv->SetStrMode(MODE_MANUAL);
+}
+// steer mode Program
+void Mv2Driver::sndStrModeP()
+{
+    mv->SetStrMode(MODE_PROGRAM);
+}
+// steer control mode Angle
+void Mv2Driver::sndStrCModeA()
+{
+    mv->SetStrCMode(CONT_MODE_ANGLE);
+}
+// steer cntrol mode Torque
+void Mv2Driver::sndStrCModeT()
+{
+    mv->SetStrCMode(CONT_MODE_TORQUE);
+}
+// steer override mode ON
+/*void Mv2Driver::sndStrOModeON()
+{
+    mv->SetStrOMode(OVERRIDE_MODE_ON);
+}*/
+// steer override mode OFF
+/*void Mv2Driver::sndStrOModeOFF()
+{
+    mv->SetStrOMode(OVERRIDE_MODE_OFF);
+}*/
+// steer servo ON
+void Mv2Driver::sndStrServoON()
+{
+    mv->SetStrServo(0x00);
+}
+// steer servo OFF
+void Mv2Driver::sndStrServoOFF()
+{
+    mv->SetStrServo(0x10);
+}
+
+
+void Mv2Driver::setLeftBlinkOn()
+{
+    mv->SetBlinkLeft(1);
 }
 
 void Mv2Driver::readInfTimer()
@@ -172,10 +290,6 @@ void Mv2Driver::readInfTimer()
     // viewFirmVersion();
 
     // viewVision2Inf();
-    
-    ROS_INFO("vehicle status: ");
-    ROS_INFO("(Batt.) Main: %f V, Sub: %f V", _battInf.mVoltage, _battInf.sVoltage);
-    ROS_INFO("(Vehicle.) Veloc: %f km/h", _vehicleInf.veloc);
 
 //    if(_drvInf.mode == MODE_PROGRAM || _strInf.mode == MODE_PROGRAM){
         mv->SndPCStatus();

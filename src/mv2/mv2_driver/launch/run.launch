@@ -1,11 +1,13 @@
-<!-- -*- mode: XML -*- -->
-<!-- <?xml version="1.0"?> -->
 <launch>
   <node name="mv2_driver" pkg="mv2_driver" type="mv2_driver_node" output="screen">
-    <!-- <param name="width" value="640" type="int"/>
-    <param name="height" value="480" type="int"/> -->
   </node>
-  <node name="mv2_talker" pkg="mv2_driver" type="say_node" output="screen">
+  <!-- <node name="mv2_talker" pkg="mv2_driver" type="say_node" output="screen">
+  </node> -->
+
+  <node name="joystick" pkg="joy" type="joy_node">
+    <param name="dev" value = "/dev/input/js2"/>
   </node>
-  <!-- <param name="ip" value="127.0.0.1" type="string"/> -->
+  <node name="joy_convertor" pkg="mv2_driver" type="convertor_node">
+  </node>
+  
 </launch>

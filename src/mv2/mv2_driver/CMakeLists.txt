@@ -122,7 +122,7 @@ include_directories(
 )
 
 link_directories(
-  lib
+  ${MV2_LIB_DIRS}
 )
 
 ## Declare a C++ library
@@ -150,6 +150,10 @@ add_executable(say_node
   src/say_node.cpp
 )
 
+add_executable(joy_node
+  src/joy2mv2.cpp
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -167,7 +171,9 @@ target_link_libraries(${PROJECT_NAME}_node
 )
 target_link_libraries(say_node
   ${catkin_LIBRARIES}
-  ${MV2_LIBRARIES}
+)
+target_link_libraries(joy_node
+  ${catkin_LIBRARIES}
 )
 
 #############

@@ -29,9 +29,7 @@
             "name": "roslaunch DBG",
             "type": "ros",
             "request": "launch",
-            "target": "/home/antonio/Documents/Ros_Learning/src/mv2/launch/run.launch",
-            // "target": "/home/antonio/Documents/ROS_Learning/src/rtsp_server/launch/rtsp_streamer.launch",
-            // "target": "/home/antonio/Documents/ROS_Learning/src/eBUS/launch/eBUS.launch",
+            "target": "/home/antonio/Ros_Learning/src/mv2/launch/run.launch",
             "preLaunchTask": "catkin_build_mv2"
         },
         

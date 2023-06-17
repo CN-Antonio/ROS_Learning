@@ -52,6 +52,9 @@ add_message_files(
   statusStrInf.msg
   statusOtherInf.msg
   status.msg
+  controlDrive.msg
+  controlSteering.msg
+  controlLight.msg
   control.msg
 )
 

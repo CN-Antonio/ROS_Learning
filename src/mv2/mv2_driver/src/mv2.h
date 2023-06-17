@@ -10,7 +10,6 @@
 // ROS
 #include <ros/ros.h>
 #include "std_msgs/String.h"
-// #include <autoware_vehicle_msgs/Steering.h>
 #include "mv2_msgs/control.h"
 #include "mv2_msgs/status.h"
 

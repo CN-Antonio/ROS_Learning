@@ -67,6 +67,14 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
     // callback
     // mv->SetConfigCallback(this);
 
+    sndDrvModeP();
+    sndDrvCModeS();
+    sndDrvServoON();
+    sndDrvShiftD();
+
+    sndStrModeP();
+    sndStrCModeA();
+    sndStrServoON();
 }
 
 Mv2Driver::~Mv2Driver()
@@ -90,7 +98,7 @@ bool Mv2Driver::poll(void)
 
     // publish message using time of last packet read
     ROS_DEBUG("Publishing a full vehicle status.");
-    ROS_INFO_STREAM("Publishing a full vehicle status.");
+    // ROS_INFO_STREAM("Publishing a full vehicle status.");
 
     /* gather status info */
     // VehicleInf
@@ -121,22 +129,32 @@ bool Mv2Driver::poll(void)
 
 void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &msg)
 {
-    ROS_INFO("mv2 control msg: %s", msg->str.c_str());
+    ROS_DEBUG("mv2: %d, %d, %d\r", msg->Steering.Angle, msg->Drive.Accel, msg->Drive.Brake);
     
 
     // Timeout count
 
     /* set control values */
+    // if(msg->Drive.Mode == MV2_DRIVE_MODE_MANUAL)sndDrvModeM();
+    // else if(msg->Drive.Mode == MV2_DRIVE_MODE_PROGRAM)sndDrvModeP();
+    // if(msg->Drive.cMode == MV2_DRIVE_CMODE_VELOCITY)sndDrvCModeV();
+    // else if(msg->Drive.cMode == MV2_DRIVE_CMODE_STROKE)sndDrvCModeS();
+    // if(msg->Drive.Servo == (MV2_SERVO)SERVO_ON)sndDrvServoON();
+    // else sndDrvServoOFF();
+    
 
-    // sndDrvModeP();
-    // sndDrvCModeV();
-    // sndDrvServoON();
+    // if(msg->Steering.Mode == MV2_STEER_MODE_MANUAL)sndStrModeM();
+    // else if(msg->Steering.Mode == MV2_STEER_MODE_PROGRAM)sndStrModeP();
+    // if(msg->Steering.cMode == MV2_STEER_CMODE_ANGLE)sndStrCModeA();
+    // else if(msg->Steering.cMode == MV2_STEER_CMODE_TORQUE)sndStrCModeT();
+    // if(msg->Steering.Servo == (MV2_SERVO)SERVO_ON)sndStrServoON();
+    // else sndStrServoOFF();
 
-    sndStrModeP();
-    sndStrCModeA();
-    sndStrServoON();
+    mv->SetStrAngle(msg->Steering.Angle);
+    mv->SetDrvStroke(msg->Drive.Accel);
+    mv->SetBrakeStroke(msg->Drive.Brake);
 
-    setLeftBlinkOn();
+    // setLeftBlinkOn();
     
     // set zero timeout
     // set manual timeout
@@ -203,6 +221,42 @@ void Mv2Driver::sndDrvServoON()
 void Mv2Driver::sndDrvServoOFF()
 {
     mv->SetDrvServo(0x10);
+}
+
+// drive velocity pushButton(zero)
+void Mv2Driver::setDrvVelocZero()
+{
+    mv->SetDrvVeloc(0);
+}
+// drive stroke pushButton(zero)
+void Mv2Driver::setDrvStrokeZero()
+{
+    mv->SetDrvStroke(0);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// drive shift
+/////////////////////////////////////////////////////////////////////////////
+// drive shift(Drive)
+void Mv2Driver::sndDrvShiftD()
+{
+    setDrvStrokeZero();
+    setDrvVelocZero();
+    mv->SetDrvShiftMode(SHIFT_POS_D);
+}
+// drive shift(Neutral)
+void Mv2Driver::sndDrvShiftN()
+{
+    setDrvStrokeZero();
+    setDrvVelocZero();
+    mv->SetDrvShiftMode(SHIFT_POS_N);
+}
+// drive shift(Reverse)
+void Mv2Driver::sndDrvShiftR()
+{
+    setDrvStrokeZero();
+    setDrvVelocZero();
+    mv->SetDrvShiftMode(SHIFT_POS_R);
 }
 
 /////////////////////////////////////////////////////////////////////////////

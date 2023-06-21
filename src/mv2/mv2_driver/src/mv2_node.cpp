@@ -9,7 +9,7 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "mv2_driver");
     ros::NodeHandle node;
     ros::NodeHandle private_nh("~");
-    ros::Rate poll_rate_(5);
+    ros::Rate poll_rate_(50);
 
     // ROS2
     // rclcpp::init(argc, argv);

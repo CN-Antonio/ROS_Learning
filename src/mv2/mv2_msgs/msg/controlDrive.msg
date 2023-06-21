@@ -1,7 +1,7 @@
-int8 Mode
-int8 cMode
-int8 oMode
-int8 Servo
+int8 mode
+int8 cmode
+int8 omode
+int8 servo
 int8 Shift
 int16 Accel
 int16 Brake

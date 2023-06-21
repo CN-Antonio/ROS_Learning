@@ -1,6 +1,6 @@
-int8 Mode
-int8 cMode
-int8 oMode
-int8 Servo
+int8 mode
+int8 cmode
+int8 omode
+int8 servo
 int16 Torque
-int16 Angle
+int16 tAngle

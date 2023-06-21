@@ -66,15 +66,7 @@ Mv2Driver::Mv2Driver(ros::NodeHandle node,
     
     // callback
     // mv->SetConfigCallback(this);
-
-    sndDrvModeP();
-    sndDrvCModeS();
-    sndDrvServoON();
-    sndDrvShiftD();
-
-    sndStrModeP();
-    sndStrCModeA();
-    sndStrServoON();
+    /* EOF */
 }
 
 Mv2Driver::~Mv2Driver()
@@ -97,12 +89,12 @@ bool Mv2Driver::poll(void)
     readInfTimer();
 
     // publish message using time of last packet read
-    ROS_DEBUG("Publishing a full vehicle status.");
+    // ROS_DEBUG("Publishing a full vehicle status.");
     // ROS_INFO_STREAM("Publishing a full vehicle status.");
 
     /* gather status info */
     // VehicleInf
-    status->VehicleInf.soc = _vehicleInf.soc; 
+    status->VehicleInf.soc = _vehicleInf.soc;
     status->VehicleInf.veloc = _vehicleInf.veloc;
     status->VehicleInf.odometer = _vehicleInf.odometer;
     status->VehicleInf.trip = _vehicleInf.trip;
@@ -127,32 +119,47 @@ bool Mv2Driver::poll(void)
     return true;
 }
 
-void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &msg)
+void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &ctrlMsg)
 {
-    ROS_DEBUG("mv2: %d, %d, %d\r", msg->Steering.Angle, msg->Drive.Accel, msg->Drive.Brake);
-    
+    // ROS_DEBUG("mv2: %d, %d, %d\r", msg->Steering.Angle, msg->Drive.Accel, msg->Drive.Brake);
 
     // Timeout count
 
+    /* set control mode */
+    if(_drvInf.mode != ctrlMsg->Drive.mode)
+    {
+        mv->SetDrvMode(ctrlMsg->Drive.mode);
+    }
+    if(_drvInf.cmode != ctrlMsg->Drive.cmode)
+    {
+        mv->SetDrvCMode(ctrlMsg->Drive.cmode);
+    }
+    if(_drvInf.servo != ctrlMsg->Drive.servo)
+    {
+        mv->SetDrvServo(ctrlMsg->Drive.servo);
+    }
+    if(_drvInf.aShift != ctrlMsg->Drive.Shift)
+    {
+        mv->SetDrvShiftMode(ctrlMsg->Drive.Shift);
+    }
+
+    if(_strInf.mode != ctrlMsg->Steering.mode)
+    {
+        mv->SetStrMode(ctrlMsg->Steering.mode);
+    }
+    if(_strInf.cmode != ctrlMsg->Steering.cmode)
+    {
+        mv->SetStrCMode(ctrlMsg->Steering.cmode);
+    }
+    if(_strInf.servo != ctrlMsg->Steering.servo)
+    {
+        mv->SetStrServo(ctrlMsg->Steering.servo);
+    }
+
     /* set control values */
-    // if(msg->Drive.Mode == MV2_DRIVE_MODE_MANUAL)sndDrvModeM();
-    // else if(msg->Drive.Mode == MV2_DRIVE_MODE_PROGRAM)sndDrvModeP();
-    // if(msg->Drive.cMode == MV2_DRIVE_CMODE_VELOCITY)sndDrvCModeV();
-    // else if(msg->Drive.cMode == MV2_DRIVE_CMODE_STROKE)sndDrvCModeS();
-    // if(msg->Drive.Servo == (MV2_SERVO)SERVO_ON)sndDrvServoON();
-    // else sndDrvServoOFF();
-    
-
-    // if(msg->Steering.Mode == MV2_STEER_MODE_MANUAL)sndStrModeM();
-    // else if(msg->Steering.Mode == MV2_STEER_MODE_PROGRAM)sndStrModeP();
-    // if(msg->Steering.cMode == MV2_STEER_CMODE_ANGLE)sndStrCModeA();
-    // else if(msg->Steering.cMode == MV2_STEER_CMODE_TORQUE)sndStrCModeT();
-    // if(msg->Steering.Servo == (MV2_SERVO)SERVO_ON)sndStrServoON();
-    // else sndStrServoOFF();
-
-    mv->SetStrAngle(msg->Steering.Angle);
-    mv->SetDrvStroke(msg->Drive.Accel);
-    mv->SetBrakeStroke(msg->Drive.Brake);
+    mv->SetStrAngle(ctrlMsg->Steering.tAngle);
+    mv->SetDrvStroke(ctrlMsg->Drive.Accel);
+    mv->SetBrakeStroke(ctrlMsg->Drive.Brake);
 
     // setLeftBlinkOn();
     
@@ -177,132 +184,6 @@ void Mv2Driver::GetTimeStamp(char* date) // TODO:
     //     _getTime.tv_usec);              
     // return;
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// drive mode
-/////////////////////////////////////////////////////////////////////////////
-// drive mode manual
-void Mv2Driver::sndDrvModeM()
-{
-    mv->SetDrvMode(MODE_MANUAL);
-    _drvTargetVeloc = 0;
-    _drvTargetStroke = 0;
-}
-// drive mode program
-void Mv2Driver::sndDrvModeP()
-{
-    mv->SetDrvMode(MODE_PROGRAM);
-}
-void Mv2Driver::sndDrvCModeS()
-{
-    mv->SetDrvCMode(CONT_MODE_STROKE);
-}
-// drive control mode velocity
-void Mv2Driver::sndDrvCModeV()
-{
-    mv->SetDrvCMode(CONT_MODE_VELOCITY);
-}
-// drive override mode ON
-/*void Mv2Driver::sndDrvOModeON()
-{
-    mv->SetDrvOMode(OVERRIDE_MODE_ON);
-}*/
-// drive override mode OFF
-/*void Mv2Driver::sndDrvOModeOFF()
-{
-    mv->SetDrvOMode(OVERRIDE_MODE_OFF);
-}*/
-// drive servo ON
-void Mv2Driver::sndDrvServoON()
-{
-    mv->SetDrvServo(0x00);
-}
-// drive servo OFF
-void Mv2Driver::sndDrvServoOFF()
-{
-    mv->SetDrvServo(0x10);
-}
-
-// drive velocity pushButton(zero)
-void Mv2Driver::setDrvVelocZero()
-{
-    mv->SetDrvVeloc(0);
-}
-// drive stroke pushButton(zero)
-void Mv2Driver::setDrvStrokeZero()
-{
-    mv->SetDrvStroke(0);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// drive shift
-/////////////////////////////////////////////////////////////////////////////
-// drive shift(Drive)
-void Mv2Driver::sndDrvShiftD()
-{
-    setDrvStrokeZero();
-    setDrvVelocZero();
-    mv->SetDrvShiftMode(SHIFT_POS_D);
-}
-// drive shift(Neutral)
-void Mv2Driver::sndDrvShiftN()
-{
-    setDrvStrokeZero();
-    setDrvVelocZero();
-    mv->SetDrvShiftMode(SHIFT_POS_N);
-}
-// drive shift(Reverse)
-void Mv2Driver::sndDrvShiftR()
-{
-    setDrvStrokeZero();
-    setDrvVelocZero();
-    mv->SetDrvShiftMode(SHIFT_POS_R);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// steer Mode
-/////////////////////////////////////////////////////////////////////////////
-// steer mode Manual
-void Mv2Driver::sndStrModeM()
-{
-    mv->SetStrMode(MODE_MANUAL);
-}
-// steer mode Program
-void Mv2Driver::sndStrModeP()
-{
-    mv->SetStrMode(MODE_PROGRAM);
-}
-// steer control mode Angle
-void Mv2Driver::sndStrCModeA()
-{
-    mv->SetStrCMode(CONT_MODE_ANGLE);
-}
-// steer cntrol mode Torque
-void Mv2Driver::sndStrCModeT()
-{
-    mv->SetStrCMode(CONT_MODE_TORQUE);
-}
-// steer override mode ON
-/*void Mv2Driver::sndStrOModeON()
-{
-    mv->SetStrOMode(OVERRIDE_MODE_ON);
-}*/
-// steer override mode OFF
-/*void Mv2Driver::sndStrOModeOFF()
-{
-    mv->SetStrOMode(OVERRIDE_MODE_OFF);
-}*/
-// steer servo ON
-void Mv2Driver::sndStrServoON()
-{
-    mv->SetStrServo(0x00);
-}
-// steer servo OFF
-void Mv2Driver::sndStrServoOFF()
-{
-    mv->SetStrServo(0x10);
-}
-
 
 void Mv2Driver::setLeftBlinkOn()
 {

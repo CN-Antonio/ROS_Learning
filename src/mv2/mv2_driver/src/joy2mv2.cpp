@@ -28,12 +28,8 @@ joy2mv2::joy2mv2(ros::NodeHandle node)
 void joy2mv2::init()
 {
     // init mode
-    ctrlMsg.Drive.Mode     = MV2_DRIVE_MODE_PROGRAM;
-    ctrlMsg.Drive.cMode    = MV2_DRIVE_CMODE_STROKE;
-    ctrlMsg.Drive.Servo    = (MV2_SERVO)SERVO_ON;
-    ctrlMsg.Steering.Mode  = MV2_STEER_MODE_PROGRAM;
-    ctrlMsg.Steering.cMode = MV2_STEER_CMODE_ANGLE;
-    ctrlMsg.Steering.Servo = (MV2_SERVO)SERVO_ON;
+    ctrlMsg.Drive.mode     = (MV2_MODE)MODE_MANUAL;
+    ctrlMsg.Steering.mode  = (MV2_MODE)MODE_MANUAL;
 
     // init value
     ctrlMsg.Drive.Accel = 0;
@@ -70,9 +66,34 @@ int main(int argc, char ** argv)
 
 void joy2mv2::joyMsgCb(const sensor_msgs::Joy::ConstPtr &msg)
 {
-    // ROS_INFO_STREAM("joyMsgCb");
-    // ROS_INFO("brk %f", msg->axes[2]);
-    ctrlMsg.Steering.Angle = -(int)(msg->axes[0] * 4000);
-    ctrlMsg.Drive.Accel = (int)((-msg->axes[5]+1) * 1000);
-    ctrlMsg.Drive.Brake = (int)((-msg->axes[2]+1) * 2000);
+    /* mode */
+    if(msg->buttons[0] == 1) // A => Gear-D
+    {
+        ctrlMsg.Drive.Shift= (SHIFT_POSITION)SHIFT_POS_D;
+    }
+    if(msg->buttons[1] == 1) // B => Gear-R
+    {
+        ctrlMsg.Drive.Shift= (SHIFT_POSITION)SHIFT_POS_R;
+    }
+    if(msg->buttons[3] == 1) // X => Program(PC)
+    {
+        ROS_INFO_STREAM("Program Mode");
+        ctrlMsg.Drive.mode     = (MV2_MODE)MODE_PROGRAM;
+        ctrlMsg.Drive.cmode    = (DRIVE_CONTROL_MODE)CONT_MODE_STROKE;
+        ctrlMsg.Drive.servo    = (MV2_SERVO)SERVO_ON;
+        ctrlMsg.Steering.mode  = (MV2_MODE)MODE_PROGRAM;
+        ctrlMsg.Steering.cmode = (STEER_CONTROL_MODE)CONT_MODE_ANGLE;
+        ctrlMsg.Steering.servo = (MV2_SERVO)SERVO_ON;
+    }
+    if(msg->buttons[4] == 1) // Y => Manual
+    {
+        ROS_INFO_STREAM("Manual Mode");
+        ctrlMsg.Drive.mode     = (MV2_MODE)MODE_MANUAL;
+        ctrlMsg.Steering.mode  = (MV2_MODE)MODE_MANUAL;
+    }
+
+    /* value */
+    ctrlMsg.Steering.tAngle = -(int)(msg->axes[0] * 4000);
+    ctrlMsg.Drive.Accel = (int)((-msg->axes[4]+1) * 1000);
+    ctrlMsg.Drive.Brake = (int)((-msg->axes[5]+1) * 2000);
 }

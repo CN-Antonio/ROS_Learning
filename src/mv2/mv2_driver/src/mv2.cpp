@@ -101,11 +101,15 @@ bool Mv2Driver::poll(void)
     // BattInf
     // status->BattInf.
     // BrakeInf
+    status->BrakeInf.aStroke = _brakeInf.aStroke;
+    status->BrakeInf.lamp    = _brakeInf.lamp;
+    status->BrakeInf.blinkL  = _brakeInf.blinkL;
+    status->BrakeInf.blinkR  = _brakeInf.blinkR;
     // DrvInf
     // StrInf
     status->StrInf.mode = _strInf.mode;
     status->StrInf.aAngle = _strInf.aAngle;
-    status->StrInf.tAngle = _strInf.tAngle;
+    // status->StrInf.tAngle = _strInf.tAngle;
     // OtherInf
     status->OtherInf.errLevel = _otherInf.errLevel;
     status->OtherInf.errCode = _otherInf.errCode;
@@ -125,7 +129,7 @@ void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &ctrlMsg)
 
     // Timeout count
 
-    /* set control mode */
+    /* Drive */
     if(_drvInf.mode != ctrlMsg->Drive.mode)
     {
         mv->SetDrvMode(ctrlMsg->Drive.mode);
@@ -142,7 +146,12 @@ void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &ctrlMsg)
     {
         mv->SetDrvShiftMode(ctrlMsg->Drive.Shift);
     }
+    mv->SetDrvStroke(ctrlMsg->Drive.Accel);
 
+    /* Brake */
+    mv->SetBrakeStroke(ctrlMsg->Drive.Brake);
+
+    /* Steering */
     if(_strInf.mode != ctrlMsg->Steering.mode)
     {
         mv->SetStrMode(ctrlMsg->Steering.mode);
@@ -155,15 +164,27 @@ void Mv2Driver::controlMsgCb(const mv2_msgs::control::ConstPtr &ctrlMsg)
     {
         mv->SetStrServo(ctrlMsg->Steering.servo);
     }
-
-    /* set control values */
     mv->SetStrAngle(ctrlMsg->Steering.tAngle);
-    mv->SetDrvStroke(ctrlMsg->Drive.Accel);
-    mv->SetBrakeStroke(ctrlMsg->Drive.Brake);
 
-    // setLeftBlinkOn();
+    /* Light */
+    if(ctrlMsg->Steering.tAngle < -750)
+    {
+        mv->SetBlinkLeft(1);
+    }
+    else
+    {
+        mv->SetBlinkLeft(ctrlMsg->Light.left);
+    }
+    if(ctrlMsg->Steering.tAngle > 750)
+    {
+        mv->SetBlinkRight(1);
+    }
+    else
+    {
+        mv->SetBlinkRight(ctrlMsg->Light.right);
+    }
     
-    // set zero timeout
+        // set zero timeout
     // set manual timeout
 
     // control
@@ -183,11 +204,6 @@ void Mv2Driver::GetTimeStamp(char* date) // TODO:
     //     _s_time->tm_sec,
     //     _getTime.tv_usec);              
     // return;
-}
-
-void Mv2Driver::setLeftBlinkOn()
-{
-    mv->SetBlinkLeft(1);
 }
 
 void Mv2Driver::readInfTimer()

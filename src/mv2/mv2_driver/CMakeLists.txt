@@ -146,10 +146,6 @@ add_executable(${PROJECT_NAME}_node
   # src/mv2_vehicle_info.cpp
 )
 
-add_executable(say_node 
-  src/say_node.cpp
-)
-
 add_executable(joy_node
   src/joy2mv2.cpp
 )
@@ -168,9 +164,6 @@ add_executable(joy_node
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${MV2_LIBRARIES}
-)
-target_link_libraries(say_node
-  ${catkin_LIBRARIES}
 )
 target_link_libraries(joy_node
   ${catkin_LIBRARIES}

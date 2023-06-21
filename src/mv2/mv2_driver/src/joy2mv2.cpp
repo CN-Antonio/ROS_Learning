@@ -67,14 +67,6 @@ int main(int argc, char ** argv)
 void joy2mv2::joyMsgCb(const sensor_msgs::Joy::ConstPtr &msg)
 {
     /* mode */
-    if(msg->buttons[0] == 1) // A => Gear-D
-    {
-        ctrlMsg.Drive.Shift= (SHIFT_POSITION)SHIFT_POS_D;
-    }
-    if(msg->buttons[1] == 1) // B => Gear-R
-    {
-        ctrlMsg.Drive.Shift= (SHIFT_POSITION)SHIFT_POS_R;
-    }
     if(msg->buttons[3] == 1) // X => Program(PC)
     {
         ROS_INFO_STREAM("Program Mode");
@@ -90,6 +82,32 @@ void joy2mv2::joyMsgCb(const sensor_msgs::Joy::ConstPtr &msg)
         ROS_INFO_STREAM("Manual Mode");
         ctrlMsg.Drive.mode     = (MV2_MODE)MODE_MANUAL;
         ctrlMsg.Steering.mode  = (MV2_MODE)MODE_MANUAL;
+    }
+    /* gear */
+    if(msg->buttons[0] == 1) // A => Gear-D
+    {
+        ctrlMsg.Drive.Shift = (SHIFT_POSITION)SHIFT_POS_D;
+    }
+    if(msg->buttons[1] == 1) // B => Gear-R
+    {
+        ctrlMsg.Drive.Shift = (SHIFT_POSITION)SHIFT_POS_R;
+    }
+    /* light */
+    if(msg->buttons[6] == 1) // LB => L-light
+    {
+        ctrlMsg.Light.left = 1;
+    }
+    else
+    {
+        ctrlMsg.Light.left = 0;
+    }
+    if(msg->buttons[7] == 1) // RB => R-light
+    {
+        ctrlMsg.Light.right = 1;
+    }
+    else
+    {
+        ctrlMsg.Light.right = 0;
     }
 
     /* value */

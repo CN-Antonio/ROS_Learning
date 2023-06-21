@@ -3,9 +3,8 @@
 time stamp              # packet timestamp
 bool isConnected
 
-# Battery info
-statusVehicleInf    VehicleInf
 # ststusBattInf       BattInf
+statusBrakeInf      BrakeInf
+statusVehicleInf    VehicleInf
 statusStrInf        StrInf
 statusOtherInf      OtherInf
-

@@ -47,7 +47,7 @@ private:
     ros::Subscriber sub_;
     ros::Publisher pub_;
 
-    mv2_msgs::status statusMsg;
+    // mv2_msgs::status statusMsg;
     mv2_msgs::control ctrlMsg;
 
     void controlMsgCb(const mv2_msgs::control::ConstPtr &msg);
@@ -57,14 +57,6 @@ private:
     void ReqClearErr();
 
     void resetPort();
-
-    // Lamp
-    void setBrkLampOn();
-    void setBrkLampOff();
-    void setRightBlinkOn();
-    void setRightBlinkOff();
-    void setLeftBlinkOn();
-    void setLeftBlinkOff();
 
 // コンフィグ情報受信
     void GetConfStrGainKP();        // ステアリング角度制御ゲイン(Kp)
@@ -147,9 +139,6 @@ private:
     void setGameEnable();           // ゲームコントローラ enable/disable 設定
 
     void GetTimeStamp(char* date);
-
-    // TODO: publish info
-    void pubInf();
 
     MvCnt* mv;              // Mv2制御ライブラリクラス
     BattInf _battInf;       // バッテリ情報

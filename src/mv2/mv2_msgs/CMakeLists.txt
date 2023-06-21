@@ -47,10 +47,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  statusVehicleInf.msg
   statusBattInf.msg
-  statusStrInf.msg
+  statusBrakeInf.msg
   statusOtherInf.msg
+  statusStrInf.msg
+  statusVehicleInf.msg
   status.msg
   controlDrive.msg
   controlSteering.msg
